@@ -1,5 +1,6 @@
-import streamlit as st
+# Defines application UI layout and content
 # ref: https://www.youtube.com/watch?v=c8QXUrvSSyg
+import streamlit as st
 
 
 def configure_page() -> None:

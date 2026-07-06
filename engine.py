@@ -1,3 +1,4 @@
+# Defines underlying application logic
 import streamlit as st
 
 # Func: Fetch edcaps calculator (JS directly embedded in HTML)
