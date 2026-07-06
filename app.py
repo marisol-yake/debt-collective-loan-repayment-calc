@@ -27,7 +27,7 @@ def configure_input_sidebar() -> None:
         st.selectbox("State of Residency:", options=["Contiguous U.S.", "Alaska", "Hawaii"], key="state_of_residency")
         st.selectbox("Borrower Type (for IBR):", options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"], key="borrower_type")
         # Add on_click: configure_calculator_results()
-        st.button("Calculate", width="stretch")
+        st.button("Calculate", width="stretch", type="primary")
 
 
 def configure_calculator_results():
