@@ -4,7 +4,10 @@ import streamlit as st
 
 
 def configure_page() -> None:
-    st.set_page_config(page_title="Debt Collective Loan Repayment Calculator", layout="wide")
+    st.set_page_config(
+        page_title="Debt Collective Loan Repayment Calculator",
+        initial_sidebar_state="expanded",
+        layout="wide")
 
 
 def configure_result_title() -> None:
