@@ -28,7 +28,7 @@ def configure_page_title() -> None:
 
     st.markdown("## Are your servicer's monthly repayment estimates WAY off from what they should be?")
     st.subheader("A tool built *by* debtors, *for* debtors.")
-    st.caption("Built with :heart: by **Marisol Yake**, alongside the **Debt Collective's Pause Payments Campaign Data Team**.")
+    st.caption("Built with :heart: by **Marisol Yake** as part of the **Debt Collective's Pause Payments Campaign Data Team**.")
     st.markdown("This is a calculator to help debtors determine how far off their student loan servicer's estimates are from what they should be.")
     st.markdown("Uses the trustworthy process of the [edcap calculator](https://www.edcapny.org/resources-for-borrowers/repayment-plan-calculator/), and your estimated repayment amount, to describe exactly **how far** off.")
 
