@@ -1,2 +1,5 @@
 [theme]
 baseFontSize = 18
+
+[client]
+toolbarMode = "viewer"
