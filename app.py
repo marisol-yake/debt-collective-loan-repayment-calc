@@ -7,9 +7,26 @@ def configure_page() -> None:
     st.set_page_config(
         page_title="Debt Collective Loan Repayment Calculator",
         initial_sidebar_state="locked", layout="wide")
+    st.logo("https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
+            icon_image="https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
+            link="https://debtcollective.org/")
 
 
 def configure_page_title() -> None:
+    # TODO: Add Debt Collective Style banner
+    # I need a designer's help lol
+    # st.html("""
+    #     <style>
+    #         .st-key-title-banner {
+    #             background: #dc3545 !important;  /* Bootstrap red */
+    #             color: white;
+    #             width: 100%;
+    #         }
+    #     </style>
+    # """)
+    # with st.container(key="title-banner"):
+    #     st.markdown("# Debt Collective Loan Repayment Calculator")
+
     st.markdown("## Are your servicer's monthly repayment estimates WAY off from what they should be?")
     st.markdown("This is a calculator to help debtors determine how far off their student loan servicer's estimates are from what they should be.")
     st.markdown("Uses the trustworthy process of the [edcap calculator](https://www.edcapny.org/resources-for-borrowers/repayment-plan-calculator/), and your estimated repayment amount, to describe exactly **how far** off.")
@@ -73,9 +90,9 @@ def configure_calculator_results():
     # This: +$200 and -$200
     # Instead of: $200 and $-200
     display_value = f"${abs(placeholder_difference)} ({placeholder_percent_diff:0,.0%})"
-    # TODO: def display_flagged_diff(percent_diff: float) -> None
+    # TODO: def display_flagged_diff(display_value: string, percent_diff: float) -> None
     # TODO: Adjusts display value string of metric card to highlight flagged differences
-    # Example use: display_flagged_diff(percent_diff)
+    # Example use: display_flagged_diff(display_value, percent_diff=percent_diff)
     if abs(placeholder_percent_diff) >= 0.2:
         with st.container(key="metric-card"):
             if placeholder_percent_diff > 0:
