@@ -6,7 +6,7 @@ import streamlit as st
 def configure_page() -> None:
     st.set_page_config(
         page_title="Debt Collective Loan Repayment Calculator",
-        initial_sidebar_state="locked", layout="wide")
+        layout="wide")
     st.logo("https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
             icon_image="https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
             link="https://debtcollective.org/")
