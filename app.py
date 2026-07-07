@@ -27,6 +27,8 @@ def configure_page_title() -> None:
     #     st.markdown("# Debt Collective Loan Repayment Calculator")
 
     st.markdown("## Are your servicer's monthly repayment estimates WAY off from what they should be?")
+    st.subheader("A tool built *by* debtors, *for* debtors.")
+    st.caption("Built with :heart: by **Marisol Yake**, alongside the **Debt Collective's Pause Payments Campaign Data Team**.")
     st.markdown("This is a calculator to help debtors determine how far off their student loan servicer's estimates are from what they should be.")
     st.markdown("Uses the trustworthy process of the [edcap calculator](https://www.edcapny.org/resources-for-borrowers/repayment-plan-calculator/), and your estimated repayment amount, to describe exactly **how far** off.")
 
@@ -55,8 +57,18 @@ def configure_input_sidebar() -> None:
         st.button("Calculate", width="stretch", type="primary")
 
 
+def configure_planwise_comparison_menu() -> None:
+    # Add spacer from intro text - visual breathing room
+    st.html("<div style='height: 15px;'></div>")
+
+    st.selectbox("Payment Plan for Comparison:",
+                 options=["Traditional Repayment Plan", "Income-Based Repayment (IBR)",
+                 "Income-Contingent Repayment (ICR)","Pay As You Earn (PAYE)",
+                 "Revised Pay As You Earn (REPAYE)", "Repayment Assistance Plan (RAP)"],
+                 index=None, placeholder="Choose a Repayment Plan", key="comparison_plan")
+
+
 def configure_calculator_results():
-    # TODO: Externalize into CSS stylesheet 
     st.html("""
         <style>
             /* Color flagged differences as red */
@@ -71,8 +83,6 @@ def configure_calculator_results():
     placeholder_difference = st.session_state.servicer_estimate - trad_plan_est
     placeholder_percent_diff = (placeholder_difference) / trad_plan_est
 
-    # Add spacer from intro text - visual breathing room
-    st.html("<div style='height: 15px;'></div>")
     col1, col2 = st.columns(2)
     with col1:
         st.metric("**Your Loan Servicer's Provided Monthly Payment Estimate**",
@@ -89,8 +99,7 @@ def configure_calculator_results():
     # This: +$200 and -$200
     # Instead of: $200 and $-200
     display_value = f"${abs(placeholder_difference)} ({placeholder_percent_diff:0,.0%})"
-    # TODO: def display_flagged_diff(display_value: string, percent_diff: float) -> None
-    # TODO: Adjusts display value string of metric card to highlight flagged differences
+    # TODO: def display_flagged_diff(display_value: string, *, percent_diff: float) -> None
     # Example use: display_flagged_diff(display_value, percent_diff=percent_diff)
     if abs(placeholder_percent_diff) >= 0.2:
         with st.container(key="metric-card"):
@@ -104,11 +113,25 @@ def configure_calculator_results():
         st.metric("**Total Difference**", value=display_value, border=True)
 
 
+def configure_footer() -> None:
+    st.divider()
+    st.markdown("**Disclaimers**")
+    disclaimers = """
+        - All numbers provided are estimates.
+        - Another cool disclaimer.
+        - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        - Excepteur sint occaecat cupidatat non proident.
+    """
+    st.caption(disclaimers)
+
+
 def main() -> None:
     configure_page()
     configure_page_title()
     configure_input_sidebar()
+    configure_planwise_comparison_menu()
     configure_calculator_results()
+    configure_footer()
 
 
 if __name__=="__main__":
