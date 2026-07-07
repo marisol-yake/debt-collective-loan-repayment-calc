@@ -8,8 +8,7 @@ def configure_page() -> None:
         page_title="Debt Collective Loan Repayment Calculator",
         layout="wide")
     st.logo("https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
-            icon_image="https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
-            link="https://debtcollective.org/")
+            size="large", link="https://debtcollective.org/")
 
 
 def configure_page_title() -> None:
