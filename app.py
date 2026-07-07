@@ -34,7 +34,7 @@ def configure_input_sidebar() -> None:
                      key="state_of_residency")
         st.selectbox("Borrower Type (for IBR):",
                      options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
-                     placeholder="Choose a Borrower Type", key="borrower_type")
+                     index=None, placeholder="Choose a Borrower Type", key="borrower_type")
         # Add on_click: configure_calculator_results()
         st.button("Calculate", width="stretch", type="primary")
 
