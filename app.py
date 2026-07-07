@@ -90,7 +90,13 @@ def configure_calculator_results():
                   format="dollar", border=True)
 
     with col2:
-        st.metric("**Monthly Payment Estimate on the Traditional Plan**",
+        # Could be worth cleaning up later
+        if st.session_state.comparison_plan is None:
+            plan = "Traditional Repayment Plan"
+        else:
+            plan = st.session_state.comparison_plan
+        # TODO: Replace *value*
+        st.metric(f"**Monthly Payment Estimate under {plan}**",
                   value=f"{trad_plan_est}", format="dollar", border=True)
 
     # If the percent difference is greater than or equal to 20% in either direction
