@@ -59,7 +59,7 @@ def configure_input_sidebar() -> None:
 
 def configure_planwise_comparison_menu() -> None:
     # Add spacer from intro text - visual breathing room
-    st.html("<div style='height: 15px;'></div>")
+    # st.html("<div style='height: 15px;'></div>")
 
     st.selectbox("Payment Plan for Comparison:",
                  options=["Traditional Repayment Plan", "Income-Based Repayment (IBR)",
