@@ -36,17 +36,23 @@ def configure_page_title() -> None:
 def configure_input_sidebar() -> None:
     with st.sidebar:
         st.number_input("Servicer Monthly Payment Estimate ($):",
-                        value=0.0, step=1.0, key="servicer_estimate")
+                        min_value=0.0, value=0.0, step=1.0,
+                        key="servicer_estimate")
         st.number_input("Total Loan Balance ($):",
-                        value=0.0, step=1.0, key="total_balance")
+                        min_value=0.0, value=0.0, step=1.0,
+                        key="total_balance")
         st.number_input("Annual Interest Rate (%):",
-                        value=0.0, step=1.0, key="annual_interest_rate")
+                        min_value=0.0, value=0.0, step=1.0,
+                        key="annual_interest_rate")
         st.number_input("Adjusted Gross Income (AGI) ($):",
-                        value=0.0, step=1.0, key="agi")
+                        min_value=0.0, value=0.0, step=1.0,
+                        key="agi")
         st.number_input("Household Size (For IBR, PAYE, and ICR):",
-                        value=0, step=1, key="household_size")
+                        min_value=0.0, value=0, step=1,
+                        key="household_size")
         st.number_input("Number of Dependents (Claimed on taxes - Only For RAP):",
-                        value=0, step=1, key="num_of_dependents")
+                        min_value=0.0, value=0, step=1,
+                        key="num_of_dependents")
         st.selectbox("State of Residency:",
                      options=["Contiguous U.S.", "Alaska", "Hawaii"],
                      key="state_of_residency")
