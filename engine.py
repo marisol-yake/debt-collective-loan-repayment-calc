@@ -2,7 +2,6 @@
 import streamlit as st
 import bs4
 import requests
-import pythonmonkey as pm
 import typing
 
 
@@ -28,23 +27,22 @@ def extract_calc_HTML_form():
 # TODO: Wrap this in a class - EDCAPCalcFetcher
 # Func: Extract JS logic - Repayment Calculator
 def extract_calc_JS_logic(soup: bs4.BeautifulSoup):
-    try:
-        calc_logic = soup.find_all("script")[0].get_text(strip=True)
-        pm.eval(calc_logic)
-
+    # try:
+    calc_logic = soup.find_all("script")[0].get_text(strip=True)
+    
         # Extract relevant logic from the code
-        calculator_ctx = {
-            "calculateStandardPayment": pm.globalThis.calculateStandardPayment,
-            "calculateICR": pm.globalThis.calculateICR,
-            "calculateIBR": pm.globalThis.calculateIBR,
-            "calculatePAYE": pm.globalThis.calculatePAYE,
-            "calculateRAP": pm.globalThis.calculateRAP,
-        }
+    #     calculator_ctx = {
+    #         "calculateStandardPayment": pm.globalThis.calculateStandardPayment,
+    #         "calculateICR": pm.globalThis.calculateICR,
+    #         "calculateIBR": pm.globalThis.calculateIBR,
+    #         "calculatePAYE": pm.globalThis.calculatePAYE,
+    #         "calculateRAP": pm.globalThis.calculateRAP,
+    #     }
 
-    except:
-        raise JavascriptNotFoundError("Javascript logic not found. Potentially extracted the wrong HTML file or server blocked this script.")
+    # except:
+    #     raise JavascriptNotFoundError("Javascript logic not found. Potentially extracted the wrong HTML file or server blocked this script.")
 
-    return calculator_ctx
+    # return calculator_ctx
 
 
 # TODO: Wrap this in a class - LoanRepayCalculator
@@ -119,7 +117,7 @@ def calculate_comparisons() -> None:
 # TODO: Make sure it pops-up only once per session (How?)
 # NOTE: Maybe make this a button, so instead of worrying about implementation, users can opt-in to share
 
-if __name__=="__main__":
-    soup = extract_calc_HTML_form()
-    ctx = extract_calc_JS_logic(soup)
-    calculate_all_plans(ctx)
+# if __name__=="__main__":
+    # soup = extract_calc_HTML_form()
+    # ctx = extract_calc_JS_logic(soup)
+    # calculate_all_plans(ctx)
