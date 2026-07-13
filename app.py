@@ -48,10 +48,10 @@ def configure_input_sidebar() -> None:
                         min_value=0.0, value=0.0, step=1.0,
                         key="agi")
         st.number_input("Household Size (For IBR, PAYE, and ICR):",
-                        min_value=0.0, value=0, step=1,
+                        min_value=0, value=0, step=1,
                         key="household_size")
         st.number_input("Number of Dependents (Claimed on taxes - Only For RAP):",
-                        min_value=0.0, value=0, step=1,
+                        min_value=0, value=0, step=1,
                         key="num_of_dependents")
         st.selectbox("State of Residency:",
                      options=["Contiguous U.S.", "Alaska", "Hawaii"],
