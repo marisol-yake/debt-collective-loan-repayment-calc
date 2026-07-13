@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compare Income-Driven Repayment Calculators</title>
+  <style>
+    body {
+      font-family: 'Barlow', sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+    h1 {
+      text-align: left;
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    small {
+      display: block;
+      margin-top: 4px;
+      font-style: italic;
+      color: #555;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      background-color: #32a242;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #056839;
+    }
+    .results {
+      margin-top: 30px;
+      background-color: #f4f4f4;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #056839;
+      padding: 10px;
+    }
+    th {
+      background-color: #056839;
+      color: white;
+    }
+    td {
+      background-color: #fff;
+    }
+    .note-row td {
+      text-align: left;
+      font-style: italic;
+      color: #555;
+      background-color: #e9f2fc;
+      border-top: none;
+      border-bottom: none;
+    }
+.update-btn {
+  background-color: #003366; /* Dark blue */
+}
+
+.update-btn:hover {
+  background-color: #001f4d;
+}
+
+.reset-btn {
+  background-color: #cc0000; /* Red */
+}
+
+.reset-btn:hover {
+  background-color: #990000;
+}
+
+  </style>
+</head>
+<body>
+
+  <form id="idrForm" onsubmit="event.preventDefault(); calculateAll();">
+    <label for="balance">Total Loan Balance ($):</label>
+    <input type="number" id="balance" min="0" step="0.01" required />
+
+    <label for="interest">Annual Interest Rate (%):</label>
+    <input type="number" id="interest" min="0" step="0.01" required />
+
+    <label for="agi">Adjusted Gross Income (AGI) ($):</label>
+    <input type="number" id="agi" min="0" step="0.01" required />
+    <small>If married, include spouse's income ONLY if filing taxes jointly.</small>
+
+    <label for="household">Household Size (For IBR,PAYE and ICR):</label>
+    <input type="number" id="household" min="1" step="1" required />
+    <small>Include yourself, dependents, spouse (if filing jointly), and others you support.</small>
+
+    <label for="dependents">Number of Dependents (Claimed on taxes - For RAP):</label>
+    <input type="number" id="dependents" min="0" step="1" value="0" />
+    <small>Used only for RAP calculation.</small>
+
+    <label for="state">State of Residency:</label>
+    <select id="state" required>
+      <option value="contiguous">Contiguous U.S.</option>
+      <option value="alaska">Alaska</option>
+      <option value="hawaii">Hawaii</option>
+    </select>
+
+    <label for="borrowerType">Borrower Type (for IBR):</label>
+    <select id="borrowerType" required>
+      <option value="" disabled selected hidden>Select borrower type</option>
+      <option value="new">New Borrower (after July 1, 2014)</option>
+      <option value="old">Old Borrower (before July 1, 2014)</option>
+    </select>
+
+    <button type="submit">Calculate All Plans</button>
+  </form>
+
+  <div id="results" class="results" style="display:none;"></div>
+
+  <!-- Calculator Reset Button (added, nothing else changed) -->
+  <button type="button" class="update-btn" onclick="updateInputs()">
+  Update Inputs
+</button>
+
+<button type="button" class="reset-btn" onclick="resetCalculator()">
+  Reset Calculator
+</button>
+  <script>
+    const povertyGuidelines = {
+      contiguous: [15960, 21640, 27320, 33000, 38680, 44360, 50040, 55720],
+      alaska: [19950, 27050, 34150, 41250, 48350, 55450, 62550, 69650],
+      hawaii: [18360, 24890, 31420, 37950, 44480, 51010, 57540, 64070]
+    };
+    const extraPerson = {
+      contiguous: 5680,
+      alaska: 7100,
+      hawaii: 6530
+    };
+
+    function getPovertyGuideline(state, householdSize) {
+      const table = povertyGuidelines[state];
+      return householdSize <= 8
+        ? table[householdSize - 1]
+        : table[7] + extraPerson[state] * (householdSize - 8);
+    }
+
+    function calculateStandardPayment(balance, interestRate, years = 10) {
+      const r = interestRate / 100 / 12;
+      const n = years * 12;
+      return r === 0 ? balance / n : balance * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    }
+
+    function calculateFixedPayment(balance, rate, years = 12) {
+      const r = rate / 100 / 12;
+      const n = years * 12;
+      return r === 0 ? balance / n : balance * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    }
+
+    const chart1 = [
+      { agi: 13717, factor: 55.00 }, { agi: 18873, factor: 57.79 },
+      { agi: 24285, factor: 60.57 }, { agi: 29819, factor: 66.23 },
+      { agi: 35104, factor: 71.89 }, { agi: 41769, factor: 80.33 },
+      { agi: 52462, factor: 88.77 }, { agi: 65798, factor: 100.00 },
+      { agi: 79138, factor: 100.00 }, { agi: 95112, factor: 111.80 },
+      { agi: 121787, factor: 123.50 }, { agi: 172492, factor: 141.20 },
+      { agi: 19779, factor: 150.00 }, { agi: 352277, factor: 200.00 }
+    ];
+
+    const chart2 = [
+      { agi: 13717, factor: 50.52 }, { agi: 21641, factor: 56.68 },
+      { agi: 25790, factor: 59.56 }, { agi: 33717, factor: 67.79 },
+      { agi: 41769, factor: 75.22 }, { agi: 52462, factor: 87.61 },
+      { agi: 65797, factor: 100.00 }, { agi: 79138, factor: 100.00 },
+      { agi: 99146, factor: 109.40 }, { agi: 132481, factor: 125.00 },
+      { agi: 179158, factor: 140.60 }, { agi: 250560, factor: 150.00 },
+      { agi: 409433, factor: 200.00 }
+    ];
+
+    function getChartICR(household) {
+      return household === 1 ? chart1 : chart2;
+    }
+
+    function findSurroundingAGIs(chart, agi) {
+      let lower = chart[0], higher = chart[chart.length - 1];
+      for (let i = 0; i < chart.length - 1; i++) {
+        if (agi >= chart[i].agi && agi < chart[i + 1].agi) {
+          lower = chart[i];
+          higher = chart[i + 1];
+          break;
+        }
+      }
+      return [lower, higher];
+    }
+
+    function calculateICR(balance, interestRate, agi, household, state) {
+      const povertyLevel = getPovertyGuideline(state, household);
+      const discretionaryIncome = Math.max(agi - povertyLevel, 0);
+      const monthlyDiscretionary = discretionaryIncome / 12;
+      const discretionaryPayment = monthlyDiscretionary * 0.20;
+
+      const basePayment = calculateFixedPayment(balance, interestRate);
+      const chart = getChartICR(household);
+
+      let ipf;
+
+      if ((household === 1 && agi >= 352418) || (household > 1 && agi >= 409597)) {
+        ipf = 200.0;
+      } else {
+        const [lower, higher] = findSurroundingAGIs(chart, agi);
+        if (lower.agi === higher.agi) {
+          ipf = lower.factor;
+        } else {
+          const ratio = (agi - lower.agi) / (higher.agi - lower.agi);
+          ipf = lower.factor + ratio * (higher.factor - lower.factor);
+        }
+      }
+
+      const incomeAdjustedPayment = (ipf / 100) * basePayment;
+      const icrPayment = Math.min(discretionaryPayment, incomeAdjustedPayment);
+
+      return {
+        plan: "Income-Contingent Repayment (ICR)",
+        monthlyPayment: icrPayment,
+        discretionaryPercent: 20,
+        forgivenessYears: 25,
+        notes: "Lower of 20% of discretionary income or 12-year fixed payment adjusted for income."
+      };
+    }
+
+    function calculateIBR(balance, interest, agi, household, state, borrowerType) {
+      const poverty = getPovertyGuideline(state, household);
+      const poverty150 = poverty * 1.5;
+      const discretionaryIncome = Math.max(agi - poverty150, 0);
+      const percent = borrowerType === "new" ? 0.10 : 0.15;
+      const forgivenessYears = borrowerType === "new" ? 20 : 25;
+
+      let annualPayment = discretionaryIncome * percent;
+      let monthlyPayment = annualPayment / 12;
+      const standardMonthly = calculateStandardPayment(balance, interest);
+      if (monthlyPayment > standardMonthly) monthlyPayment = standardMonthly;
+
+      return {
+        plan: "Income-Based Repayment (IBR)",
+        monthlyPayment,
+        percent: percent * 100,
+        forgivenessYears,
+        notes: "Capped at 10-year standard plan."
+      };
+    }
+
+    function calculatePAYE(balance, interest, agi, household, state) {
+      const poverty = getPovertyGuideline(state, household);
+      const poverty150 = poverty * 1.5;
+      const discretionaryIncome = Math.max(agi - poverty150, 0);
+      const percent = 0.10;
+      const forgivenessYears = 20;
+
+      let annualPayment = discretionaryIncome * percent;
+      let monthlyPayment = annualPayment / 12;
+      const standardMonthly = calculateStandardPayment(balance, interest);
+      if (monthlyPayment > standardMonthly) monthlyPayment = standardMonthly;
+
+      return {
+        plan: "Pay As You Earn (PAYE)",
+        monthlyPayment,
+        percent: percent * 100,
+        forgivenessYears,
+        notes: "Capped at 10-year standard plan."
+      };
+    }
+
+    function getRAPPercentage(agi) {
+      if (agi <= 10000) return 0;
+      if (agi <= 20000) return 0.01;
+      if (agi <= 30000) return 0.02;
+      if (agi <= 40000) return 0.03;
+      if (agi <= 50000) return 0.04;
+      if (agi <= 60000) return 0.05;
+      if (agi <= 70000) return 0.06;
+      if (agi <= 80000) return 0.07;
+      if (agi <= 90000) return 0.08;
+      if (agi <= 100000) return 0.09;
+      return 0.10;
+    }
+
+    function calculateRAP(agi, dependents) {
+      const percentage = getRAPPercentage(agi);
+      let monthlyPayment = (agi * percentage) / 12 - (50 * dependents);
+      monthlyPayment = Math.max(10, monthlyPayment);
+
+      return {
+        plan: "Repayment Assistance Plan (RAP)",
+        monthlyPayment,
+        discretionaryPercent: (percentage * 100),
+        forgivenessYears: 30,
+        notes: "% of AGI minus $50 per dependent claimed on tax return. Minimum $10/month."
+      };
+    }
+
+    function calculateAll() {
+      const balance = parseFloat(document.getElementById("balance").value);
+      const interest = parseFloat(document.getElementById("interest").value);
+      const agi = parseFloat(document.getElementById("agi").value);
+      const household = parseInt(document.getElementById("household").value);
+      const dependents = parseInt(document.getElementById("dependents").value);
+      const state = document.getElementById("state").value;
+      const borrowerType = document.getElementById("borrowerType").value;
+
+      if (isNaN(balance) || isNaN(interest) || isNaN(agi) || isNaN(household) || isNaN(dependents)) {
+        alert("Please fill in all fields with valid values.");
+        return;
+      }
+
+      if (!borrowerType) {
+        alert("Please select a borrower type for IBR calculation.");
+        return;
+      }
+
+      const ibr = calculateIBR(balance, interest, agi, household, state, borrowerType);
+      const paye = calculatePAYE(balance, interest, agi, household, state);
+      const icr = calculateICR(balance, interest, agi, household, state);
+      const rap = calculateRAP(agi, dependents);
+
+      const html = `
+        <h2>Income Driven Repayment (IDR) Plans</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Repayment Plan</th>
+              <th>Monthly Payment</th>
+              <th>Income %</th>
+              <th>Forgiveness</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${ibr.plan}</td>
+              <td>$${ibr.monthlyPayment.toFixed(2)}</td>
+              <td>${ibr.percent}%</td>
+              <td>${ibr.forgivenessYears} years</td>
+              <td>${ibr.notes}</td>
+            </tr>
+            <tr>
+              <td>${paye.plan}</td>
+              <td>$${paye.monthlyPayment.toFixed(2)}</td>
+              <td>${paye.percent}%</td>
+              <td>${paye.forgivenessYears} years</td>
+              <td>${paye.notes}</td>
+            </tr>
+            <tr>
+              <td>${icr.plan}</td>
+              <td>$${icr.monthlyPayment.toFixed(2)}</td>
+              <td>${icr.discretionaryPercent}%</td>
+              <td>${icr.forgivenessYears} years</td>
+              <td>${icr.notes}</td>
+            </tr>
+            <tr>
+              <td>${rap.plan}</td>
+              <td>$${rap.monthlyPayment.toFixed(2)}</td>
+              <td>${rap.discretionaryPercent.toFixed(0)}%</td>
+              <td>${rap.forgivenessYears} years</td>
+              <td>${rap.notes}</td>
+            </tr>
+          </tbody>
+        </table>`;
+
+      function getPaybackPeriod(balance) {
+        if (balance < 25000) return 10;
+        if (balance < 50000) return 15;
+        if (balance < 100000) return 20;
+        return 25;
+      }
+
+      function formatNumber(num) {
+        return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+      }
+
+      const paybackYears = getPaybackPeriod(balance);
+      const standardMonthlyPayment = calculateFixedPayment(balance, interest, paybackYears);
+      const totalPaid = standardMonthlyPayment * 12 * paybackYears;
+      const startingInterest = balance * (interest / 100) / 12;
+
+      const standardHtml = `
+        <h2>Traditional Repayment Plan (New Borrowers Starting July 1, 2026)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Repayment Plan</th>
+              <th>Monthly Payment</th>
+              <th>Starting Monthly Interest</th>
+              <th>Payback Period</th>
+              <th>Total Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Standard Fixed Repayment</td>
+              <td>$${formatNumber(standardMonthlyPayment.toFixed(2))}</td>
+              <td>$${formatNumber(startingInterest)}</td>
+              <td>${paybackYears} years</td>
+              <td>$${formatNumber(totalPaid)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = html + standardHtml;
+      resultsDiv.style.display = "block";
+      resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+	function updateInputs() {
+  document.getElementById("idrForm").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  // Place the cursor in the first field
+  document.getElementById("balance").focus();
+}
+    
+function resetCalculator() {
+  // Clear all form inputs and restore defaults
+  document.getElementById("idrForm").reset();
+
+  // Clear and hide the results
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+  resultsDiv.style.display = "none";
+
+  // Return to the top of the calculator
+  document.getElementById("idrForm").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  // Put the cursor in the first field
+  document.getElementById("balance").focus();
+}
+
+   
+  </script>
+</body>
+</html>
