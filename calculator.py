@@ -249,7 +249,7 @@ def calculate_all_plans() -> None:
     ibr = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
     icr = calculate_ICR(balance, interest, agi, household_size, state)["monthly_payment"]
     paye = calculate_PAYE(balance, interest, agi, household_size, state)["monthly_payment"]
-    repaye = calculate_REPAYE(ibr)
+    repaye = calculate_REPAYE(balance, interest, agi, household_size, state, borrower_type)
     rap = calculate_RAP(agi, num_dependents)["monthly_payment"]
     std = calculate_standard_payment(balance, interest, years=10)
 
