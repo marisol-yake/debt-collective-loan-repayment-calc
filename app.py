@@ -32,6 +32,7 @@ def init_session_state() -> None:
 def configure_page() -> None:
     st.set_page_config(
         page_title="Debt Collective Loan Repayment Calculator",
+        initial_sidebar_state=600,
         layout="wide")
     st.logo("https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
             size="large", link="https://debtcollective.org/")
