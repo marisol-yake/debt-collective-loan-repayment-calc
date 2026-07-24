@@ -1,3 +1,5 @@
+# A one-to-one translation
+
 import math
 from typing import Any, Union
 
@@ -200,9 +202,9 @@ def _get_RAP_percentage(agi: USD) -> float:
     return 0.10
 
 
-def calculate_RAP(agi: USD, num_dependents: int) -> PaymentPlanDetails:
+def calculate_RAP(agi: USD, num_of_dependents: int) -> PaymentPlanDetails:
     percentage = _get_RAP_percentage(agi)
-    monthly_payment = (agi * percentage) / 12 - (50 * num_dependents)
+    monthly_payment = (agi * percentage) / 12 - (50 * num_of_dependents)
     monthly_payment = max(10, monthly_payment)
 
     return {
@@ -214,58 +216,52 @@ def calculate_RAP(agi: USD, num_dependents: int) -> PaymentPlanDetails:
     }
 
 
-def calculate_all_plans() -> None:
-    # TODO: Get variables from st.session_state or store in class
-    # balance = parseFloat(document.getElementById("balance").value);
-    # interest = parseFloat(document.getElementById("interest").value);
-    # agi = parseFloat(document.getElementById("agi").value);
-    # household = parseInt(document.getElementById("household").value);
-    # dependents = parseInt(document.getElementById("dependents").value);
-    # state = document.getElementById("state").value;
-    # borrowerType = document.getElementById("borrowerType").value;
+def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, household_size: int, num_of_dependents: int, state: str, borrower_type: BorrowerType):
 
-    # TODO: Get variables from st.session_state
-    # Test variables:
-    balance = 10_000
-    interest = 7.34
-    agi = 30_000
-    household_size = 1
-    state = "contiguous"
-    num_dependents = 0
-    borrower_type = "new"
+    # TODO: Implement this
+    # if not balance or not interest or not agi or not household_size or num_of_dependents is None:
+    #     # MissingCalculatorParameters
+    #     # alert("Please fill in all fields with valid values.")
+    #     return
 
-    print(f"{balance = }\n{interest = }\n{agi = }\n{household_size = }\n{state = }\n{num_dependents = }\n{borrower_type = }")
-
-    if not balance or not interest or not agi or not household_size or num_dependents is None:
-        # MissingCalculatorParameters
-        # alert("Please fill in all fields with valid values.")
-        return
-    
-    if not borrower_type:
-        # MissingBorrowerType
-        # alert("Please select a borrower type for IBR calculation.");
-        return
+    # TODO: Implement this
+    # if not borrower_type:
+    #     # MissingBorrowerType
+    #     # alert("Please select a borrower type for IBR calculation.");
+    #     return
 
     ibr = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
     icr = calculate_ICR(balance, interest, agi, household_size, state)["monthly_payment"]
     paye = calculate_PAYE(balance, interest, agi, household_size, state)["monthly_payment"]
     repaye = calculate_REPAYE(balance, interest, agi, household_size, state, borrower_type)
-    rap = calculate_RAP(agi, num_dependents)["monthly_payment"]
-    std = calculate_standard_payment(balance, interest, years=10)
+    rap = calculate_RAP(agi, num_of_dependents)["monthly_payment"]
+    std = _calculate_fixed_payment(balance, interest)
 
-    print(f"\n{ibr = :,.2f}\n{icr = :,.2f}\n{paye = :,.2f}\n{repaye = :,.2f}\n{rap = :,.2f}\n{std = :,.2f}")
+    # NOTE: These don't end up in the relevant calculator results
+    # NOTE: but I'm keeping them just in case
+    # def _getPaybackPeriod(balance):
+    #     if (balance < 25000): return 10
+    #     if (balance < 50000): return 15
+    #     if (balance < 100000): return 20
+    #     return 25
 
-    def _getPaybackPeriod(balance):
-        if (balance < 25000): return 10
-        if (balance < 50000): return 15
-        if (balance < 100000): return 20
-        return 25
+    # payback_years = _getPaybackPeriod(balance)
+    # standard_monthly_payment = _calculate_fixed_payment(balance, interest, payback_years)
+    # total_paid = standard_monthly_payment * 12 * payback_years
+    # starting_interest = (balance * (interest / 100)) / 12
 
-    payback_years = _getPaybackPeriod(balance)
-    standard_monthly_payment = _calculate_fixed_payment(balance, interest, payback_years)
-    total_paid = standard_monthly_payment * 12 * payback_years
-    starting_interest = (balance * (interest / 100)) / 12
+    return ibr, icr, paye, repaye, rap, std
 
 
 if __name__=="__main__":
-    calculate_all_plans()
+    ibr, icr, paye, repaye, rap, std = calculate_all_plans(
+        balance=40_000,
+        interest=7.84,
+        agi=50_000,
+        household_size=1,
+        num_of_dependents=0,
+        state="contiguous",
+        borrower_type="new"
+    )
+
+    print(f"{ibr = :,.2f}\n{icr = :,.2f}\n{paye = :,.2f}\n{repaye = :,.2f}\n{rap = :,.2f}\n{std = :,.2f}")
