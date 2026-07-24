@@ -235,7 +235,7 @@ def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, house
     paye = calculate_PAYE(balance, interest, agi, household_size, state)["monthly_payment"]
     repaye = calculate_REPAYE(balance, interest, agi, household_size, state, borrower_type)
     rap = calculate_RAP(agi, num_of_dependents)["monthly_payment"]
-    std = _calculate_fixed_payment(balance, interest)
+    std = calculate_standard_payment(balance, interest, years=15)
 
     # NOTE: These don't end up in the relevant calculator results
     # NOTE: but I'm keeping them just in case
