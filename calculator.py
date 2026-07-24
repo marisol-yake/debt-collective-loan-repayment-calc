@@ -49,8 +49,8 @@ def calculate_standard_payment(balance: USD, interest: InterestRate, years: int 
     return result
 
 
-def _calculate_fixed_payment(balance: USD, rate: InterestRate, years: int = 12) -> USDPaymentAmount:
-    r = (rate / 100) / 12
+def _calculate_fixed_payment(balance: USD, interest: InterestRate, years: int = 12) -> USDPaymentAmount:
+    r = (interest / 100) / 12
     n = years * 12
     
     if r == 0:
@@ -181,7 +181,8 @@ def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_siz
     }
 
 
-def calculate_REPAYE(ibr_payments: USD) -> USD:
+def calculate_REPAYE(balance: USD, interest: InterestRate, agi: USD, household_size: int, state: str, borrower_type: BorrowerType) -> USD:
+    ibr_payments = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
     return ibr_payments * 0.666
 
 
