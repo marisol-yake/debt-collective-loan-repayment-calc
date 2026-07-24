@@ -1,7 +1,7 @@
 # Defines application UI layout and content
 # ref: https://www.youtube.com/watch?v=c8QXUrvSSyg
 import streamlit as st
-import calculator as calc
+import engine
 
 def init_session_state() -> None:
     defaults = {
@@ -59,8 +59,8 @@ def configure_page_title() -> None:
     st.markdown("Uses the trustworthy process of the [EDCAP calculator](https://www.edcapny.org/resources-for-borrowers/repayment-plan-calculator/), and your estimated repayment amount, to describe exactly **how far** off.")
 
 
-# Inputs get stored as st.session_state.key
 def configure_input_sidebar() -> None:
+    # Inputs get stored as st.session_state.key
     with st.sidebar:
         # Using a streamlit form prevents calculations from happening automatically
         # This prevents unnecessary computations and makes intended-use clearer
@@ -111,7 +111,7 @@ def configure_input_sidebar() -> None:
 
                 # TODO: Refactor so not every plan is calculated all at once
                 # Please forgive me, I'm in a hurry
-                st.session_state.ibr, st.session_state.icr, st.session_state.paye, st.session_state.repaye, st.session_state.rap, st.session_state.std = calc.calculate_all_plans(
+                st.session_state.ibr, st.session_state.icr, st.session_state.paye, st.session_state.repaye, st.session_state.rap, st.session_state.std = engine.calculate_all_plans(
                     balance=balance,
                     interest=interest,
                     agi=agi,
@@ -130,7 +130,7 @@ def configure_plan_selection_menu() -> None:
                  index=None, placeholder="Choose a Repayment Plan", key="comparison_plan")
 
 
-# Display Comparison: Loan Servicer Estimate - Repayment Plan Estimate
+# Display comparison between Loan Servicer Estimate and Repayment Plan Estimate
 def display_plan_comparison():
     st.html("""
         <style>
@@ -150,7 +150,6 @@ def display_plan_comparison():
         "Traditional Repayment Plan": st.session_state.std
     }
 
-
     col1, col2 = st.columns(2)
     with col1:
         st.metric("**Your Loan Servicer's Provided Monthly Payment Estimate**",
@@ -164,44 +163,14 @@ def display_plan_comparison():
         if plan not in plans:
             plan = "Traditional Repayment Plan"
 
-        selected_plan_amt = plans[plan]
+        selected_plan_est = plans[plan]
         st.metric(f"**Monthly Payment Estimate under {plan}**",
-                  value=f"{selected_plan_amt}", format="dollar", border=True)
+                  value=f"{selected_plan_est}", format="dollar", border=True)
 
-    servicer_amt = st.session_state.servicer_estimate
-    difference = servicer_amt - selected_plan_amt
-
-    # Handles edge cases where comparison is 0 / 0
-    if selected_plan_amt == 0:
-        # Case 1: Where selected plan payment amount = 0 and servicer estimate = 0
-        if servicer_amt == 0:
-            percent_diff = 0.0
-        # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
-        else:
-            percent_diff = 1.0  
-    else:
-        # Case 3: Both estimates are not equal to 0
-        percent_diff = difference / selected_plan_amt
-
-
-    # If the percent difference is greater than or equal to 20% in either direction
-    # Mark red, known as a "flagged difference"
-    # Nicely formated as +-$
-    # This: +$200 and -$200
-    # Instead of: $200 and $-200
-    display_value = f"${abs(difference):0,.2f} ({percent_diff:0,.0%})"
-    # TODO: def display_flagged_diff(display_value: string, *, percent_diff: float) -> None
-    # Example use: display_flagged_diff(display_value, percent_diff=percent_diff)
-    if abs(percent_diff) >= 0.2:
-        with st.container(key="metric-card"):
-            if percent_diff > 0:
-                display_value = display_value.replace("$", "+$").replace("(", "(+")
-            else:
-                display_value = display_value.replace("$", "-$")
-
-            st.metric("**Total Difference**", value=display_value, border=True)
-    else:
-        st.metric("**Total Difference**", value=display_value, border=True)
+    engine.display_flagged_diff(
+        selected_plan_est=selected_plan_est,
+        servicer_estimate=st.session_state.servicer_estimate
+    )
 
 
 def configure_footer() -> None:
