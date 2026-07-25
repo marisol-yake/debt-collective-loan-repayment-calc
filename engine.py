@@ -306,11 +306,3 @@ def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, house
     # starting_interest = (balance * (interest / 100)) / 12
 
     return ibr, icr, paye, repaye, rap, std
-
-
-if __name__=="__main__":
-    est = 564.00
-    selected = 657.01
-    diff = est - selected
-    diff_percent = diff / selected
-    _format_flagged_diff_display_value(diff, diff_percent)
