@@ -28,6 +28,14 @@ def _format_flagged_diff_display_value(difference: USD, percent_difference: floa
     display_value = f"${abs(difference):0,.2f} ({percent_difference:0,.0%})"
 
     if abs(percent_difference) >= 0.2:
+        st.html("""
+                <style>
+                    /* Color flagged differences as red */
+                    .st-key-metric-card [data-testid="stMetricValue"] {
+                        color: #dc3545 !important;
+                    }
+                </style>
+                """)
         if percent_difference > 0:
             display_value = display_value.replace("$", "+$").replace("(", "(+")
         else:
@@ -298,3 +306,11 @@ def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, house
     # starting_interest = (balance * (interest / 100)) / 12
 
     return ibr, icr, paye, repaye, rap, std
+
+
+if __name__=="__main__":
+    est = 564.00
+    selected = 657.01
+    diff = est - selected
+    diff_percent = diff / selected
+    _format_flagged_diff_display_value(diff, diff_percent)

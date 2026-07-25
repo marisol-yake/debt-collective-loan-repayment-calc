@@ -133,15 +133,6 @@ def configure_plan_selection_menu() -> None:
 
 # Display comparison between Loan Servicer Estimate and Repayment Plan Estimate
 def display_plan_comparison():
-    st.html("""
-        <style>
-            /* Color flagged differences as red */
-            .st-key-metric-card [data-testid="stMetricValue"] {
-                color: #dc3545 !important;
-            }
-        </style>
-    """)
-
     plans = {
         "Income-Based Repayment (IBR)": st.session_state.ibr,
         "Income-Contingent Repayment (ICR)": st.session_state.icr,
