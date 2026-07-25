@@ -27,6 +27,7 @@ def _format_flagged_diff_display_value(difference: USD, percent_difference: floa
     # Instead of: $200 and $-200
     display_value = f"${abs(difference):0,.2f} ({percent_difference:0,.0%})"
 
+    # If the percent difference is greater than 20%, then mark as flagged difference (e.g. color red)
     if abs(percent_difference) >= 0.2:
         st.html("""
                 <style>
@@ -36,6 +37,7 @@ def _format_flagged_diff_display_value(difference: USD, percent_difference: floa
                     }
                 </style>
                 """)
+
         if percent_difference > 0:
             display_value = display_value.replace("$", "+$").replace("(", "(+")
         else:
@@ -75,6 +77,7 @@ poverty_guidelines = {
     "alaska": [19950, 27050, 34150, 41250, 48350, 55450, 62550, 69650],
     "hawaii": [18360, 24890, 31420, 37950, 44480, 51010, 57540, 64070]
 }
+
 
 extra_person = {
     "contiguous": 5680,
