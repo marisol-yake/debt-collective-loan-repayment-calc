@@ -258,7 +258,7 @@ def main() -> None:
 
     # Pop up comes up after all page contents have loaded
     # Wait for a couple seconds if it hasn't been called already
-    time.sleep(3.0)
+    time.sleep(5.0)
     if not st.session_state.input_checklist_timer_done:
         st.session_state.input_checklist_timer_done = True
         spawn_loan_input_checklist()
