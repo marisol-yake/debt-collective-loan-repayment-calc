@@ -23,10 +23,34 @@ def init_session_state() -> None:
 
 
 def configure_page() -> None:
+    st.html(
+        """
+        <style>
+        [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] {
+                # height: 3rem;
+                # width : 3rem;
+                # background-color: RED;
+                animation: bounce 2s ease infinite;
+                background: #E9ECEF;
+                visibility: visible;
+            }
+        @keyframes bounce {
+            70% { transform:translateY(0%); }
+            80% { transform:translateY(-15%); }
+            90% { transform:translateY(0%); }
+            95% { transform:translateY(-7%); }
+            97% { transform:translateY(0%); }
+            99% { transform:translateY(-3%); }
+            100% { transform:translateY(0); }
+        }
+        </style>
+        """
+    )
     st.set_page_config(
         page_title="Debt Collective Loan Repayment Calculator",
         initial_sidebar_state=600,
         layout="wide")
+
     st.logo("https://wordpress-cdn-prod.debtcollective.org/wp-content/uploads/2021/08/24080706/logo-black-1.png",
             size="large", link="https://debtcollective.org/")
 
