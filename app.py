@@ -2,18 +2,11 @@
 # ref: https://www.youtube.com/watch?v=c8QXUrvSSyg
 import streamlit as st
 import engine
+import time
+
 
 def init_session_state() -> None:
     defaults = {
-        "servicer_estimate": 0.0,
-        "total_balance": 0.0,
-        "annual_interest_rate": 0.0,
-        "agi": 0.0,
-        "household_size": 0,
-        "num_of_dependents": 0,
-        "state_of_residency": "Contiguous U.S.",
-        "borrower_type": None,
-
         "ibr": 0.0,
         "icr": 0.0,
         "paye": 0.0,
@@ -21,7 +14,7 @@ def init_session_state() -> None:
         "rap": 0.0,
         "std": 0.0,
 
-        "comparison_plan": "Traditional Repayment Plan",
+    "input_checklist_timer_done": False
     }
 
     for key, value in defaults.items():
@@ -67,30 +60,38 @@ def configure_input_sidebar() -> None:
         # This prevents unnecessary computations and makes intended-use clearer
         with st.form(key="input_form"):
             # Accepts all user inputs for loan repayment calculations
+            # Setting value=None means that st.number_input is already cleared for users automatically. 
             st.number_input("Servicer Monthly Payment Estimate ($):",
-                            min_value=0.0, value=0.0, step=1.0,
+                            min_value=0.0, value=None, step=1.0, placeholder="0.00",
+                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                             key="servicer_estimate")
             st.number_input("Total Loan Balance ($):",
-                            min_value=0.0, value=0.0, step=1.0,
+                            min_value=0.0, value=None, step=1.0, placeholder="0.00",
+                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                             key="total_balance")
             st.number_input("Annual Interest Rate (%):",
-                            min_value=0.0, value=0.0, step=1.0,
+                            min_value=0.0, value=None, step=1.0, placeholder="0.00%",
+                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                             key="annual_interest_rate")
             st.number_input("Adjusted Gross Income (AGI) ($):",
-                            min_value=0.0, value=0.0, step=1.0,
+                            min_value=0.0, value=None, step=1.0, placeholder="0.00",
+                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                             key="agi")
             st.number_input("Household Size (For IBR, PAYE, and ICR):",
-                            min_value=0, value=0, step=1,
+                            min_value=0, value=None, step=1, placeholder="0",
+                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                             key="household_size")
             st.number_input("Number of Dependents (Claimed on taxes - Only For RAP):",
-                            min_value=0, value=0, step=1,
+                            min_value=0, value=None, step=1, placeholder="0",
                             key="num_of_dependents")
             st.selectbox("State of Residency:",
-                        options=["Contiguous U.S.", "Alaska", "Hawaii"],
-                        key="state_of_residency")
+                         options=["Contiguous U.S.", "Alaska", "Hawaii"],
+                         help="If you don't live in **Alaska** or **Hawaii**, you can use **Contiguous U.S.**",
+                         key="state_of_residency")
             st.selectbox("Borrower Type (for IBR):",
-                        options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
-                        index=None, placeholder="Choose a Borrower Type", key="borrower_type")
+                         options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
+                         help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                         index=None, placeholder="Choose a Borrower Type", key="borrower_type")
 
             submitted = st.form_submit_button("Calculate", width="stretch", type="primary")
 
@@ -132,7 +133,7 @@ def configure_plan_selection_menu() -> None:
 
 
 # Display comparison between Loan Servicer Estimate and Repayment Plan Estimate
-def display_plan_comparison():
+def display_plan_comparison() -> None:
     plans = {
         "Income-Based Repayment (IBR)": st.session_state.ibr,
         "Income-Contingent Repayment (ICR)": st.session_state.icr,
@@ -144,14 +145,22 @@ def display_plan_comparison():
 
     col1, col2 = st.columns(2)
     with col1:
+        # Uses a default value to prevent "None" from showing up on cards
+        if st.session_state.servicer_estimate is None:
+            servicer_est = 0
+        else:
+            servicer_est = st.session_state.servicer_estimate
+
         st.metric("**Your Loan Servicer's Provided Monthly Payment Estimate**",
-                  value=f"{st.session_state.servicer_estimate}",
+                  value=f"{servicer_est}",
                   format="dollar", border=True)
 
     with col2:
         # Provide a sensible default
         plan = st.session_state.get("comparison_plan", "Traditional Repayment Plan")
 
+        # NOTE: Is this redundant?
+        # TODO: Refactor this out if possible
         if plan not in plans:
             plan = "Traditional Repayment Plan"
 
@@ -161,8 +170,68 @@ def display_plan_comparison():
 
     engine.display_flagged_diff(
         selected_plan_est=selected_plan_est,
-        servicer_estimate=st.session_state.servicer_estimate
+        servicer_estimate=servicer_est
     )
+
+@st.dialog("Before you begin!")
+def spawn_loan_input_checklist() -> None:
+    st.markdown("Gathering all of your loan details can be a headache, so we've provided a small checklist to make sure you have everything in one place before you begin.")
+
+    st.checkbox("**Student-Loan Servicer** or **FSA** Payment Plan Estimate in USD ($).")
+    st.checkbox("**Total Outstanding Loan Amount** in USD ($).")
+    st.checkbox("Your Loan's **Annual Interest Rate** as a Percentage (%)")
+    st.checkbox("Your **Adjusted Gross Income** in USD ($).")
+    st.checkbox("Does Your Loan Originate **Before** or **After** July 1st, 2014?")
+
+    # TODO: Decide which is less tedious / more intuitive
+    # Option 1
+    # Streamlit won't let you ignore the dialog modal without just pressing the "X" button
+    # Or re-running the app entirely.
+    if st.button("I'm ready!", type="primary"):
+        st.rerun()
+
+    # Option 2
+    st.markdown("Press the '**x**' in the top-right corner of this box to continue.")
+
+@st.dialog("Want to get connected?")
+def spawn_get_connected_popup() -> None:
+    st.markdown("We at the debt collective understand that this is a sensitive topic, so we protect your information at every step.")
+    st.markdown("Click here to see our [data privacy policy](google.com).")
+
+    # Users opt-in to the information they want to share and their desired level of engagement with the Debt Collective.
+    st.checkbox("I want to get in contact with Debt Collective Staff (Loan Help?)",
+                key="get_connected_to_dc_staff")
+    st.checkbox("I want to get involved as a volunteer in the Debt Collective.",
+                key="get_connected_as_volunteer")
+    st.checkbox("I want to share my data with the Debt Collective (Case Building Data)",
+                key="get_connected_to_dc_case")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.text_input("Email:", placeholder="Enter your email here")
+
+    with col2:
+        st.selectbox("State:",
+                     options=["Prefer not to say", "AL", "AK", "AZ", "AR", 
+                             "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID",
+                             "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+                             "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV",
+                             "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK",
+                             "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT",
+                             "VT", "VA", "WA", "WV", "WI", "WY", "DC", "AS",
+                             "GU", "MP", "PR", "VI"],
+                    help="Your State or Territory of Residence",
+                    index=None
+                    )
+
+    # After they're all done selecting from the checkboxes, then they can submit their info.
+    # TODO: Implement the actual functionality of this - Likely needs DC backend help
+    st.button("Submit")
+
+
+def configure_share_button() -> None:
+    # NOTE: Prevent the button from being pressed too early?
+    st.button("Share Results", on_click=spawn_get_connected_popup, type="primary")
 
 
 def configure_footer() -> None:
@@ -184,7 +253,15 @@ def main() -> None:
     configure_input_sidebar()
     configure_plan_selection_menu()
     display_plan_comparison()
+    configure_share_button()
     configure_footer()
+
+    # Pop up comes up after all page contents have loaded
+    # Wait for a couple seconds if it hasn't been called already
+    time.sleep(3.0)
+    if not st.session_state.input_checklist_timer_done:
+        st.session_state.input_checklist_timer_done = True
+        spawn_loan_input_checklist()
 
 
 if __name__=="__main__":
