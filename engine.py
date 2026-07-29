@@ -19,7 +19,7 @@ type PaymentPlanDetails = dict[str, Any]
 ###########################################################################
 # Custom Application Logic
 ###########################################################################
-def _format_flagged_diff_display_value(difference: USD, percent_difference: float):
+def _format_flagged_diff_display_value(difference: USD, percent_difference: float) -> str:
     # If the percent difference is greater than or equal to 20% in either direction
     # Mark red, known as a "flagged difference"
     # Nicely formated as +-$
@@ -38,15 +38,20 @@ def _format_flagged_diff_display_value(difference: USD, percent_difference: floa
                 </style>
                 """)
 
-        if percent_difference > 0:
+        if percent_difference >= 0.2:
             display_value = display_value.replace("$", "+$").replace("(", "(+")
-        else:
+        elif percent_difference <= -0.2:
             display_value = display_value.replace("$", "-$")
 
     return display_value
 
 
 def display_flagged_diff(*, selected_plan_est: USD, servicer_estimate: USD) -> None:
+    if selected_plan_est is None:
+        selected_plan_est = 0
+    elif servicer_estimate is None:
+        servicer_estimate = 0
+
     difference = servicer_estimate - selected_plan_est
 
     # Handles edge cases where comparison is 0 / 0
