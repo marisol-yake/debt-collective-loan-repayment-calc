@@ -27,12 +27,13 @@ def configure_page() -> None:
         """
         <style>
         [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] {
-                # height: 3rem;
-                # width : 3rem;
-                # background-color: RED;
                 animation: bounce 2s ease infinite;
                 background: #E9ECEF;
                 visibility: visible;
+                border-style: solid;
+                border-color: #ACADAC;
+                border-width: 2.5px;
+                border-radius: 10px;
             }
         @keyframes bounce {
             70% { transform:translateY(0%); }
