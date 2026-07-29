@@ -22,6 +22,13 @@ def init_session_state() -> None:
             st.session_state[key] = value
 
 
+def init_sensible_default_for(session_state_var_name, *, value: float | int):
+    if session_state_var_name is None:
+        session_state_var_name = value
+
+    return session_state_var_name
+
+
 def configure_page() -> None:
     st.html(
         """
@@ -128,11 +135,11 @@ def configure_input_sidebar() -> None:
                     "Hawaii": "hawaii"
                 }
 
-                balance = st.session_state.total_balance
-                interest = st.session_state.annual_interest_rate
-                agi = st.session_state.agi
-                household_size = st.session_state.household_size
-                num_of_dependents = st.session_state.num_of_dependents
+                balance = init_sensible_default_for(st.session_state.total_balance, value=0.0)
+                interest = init_sensible_default_for(st.session_state.annual_interest_rate, value=0.0)
+                agi = init_sensible_default_for(st.session_state.agi, value=0.0)
+                household_size = init_sensible_default_for(st.session_state.household_size, value=0)
+                num_of_dependents = init_sensible_default_for(st.session_state.num_of_dependents, value=0)
                 state = states_dict.get(st.session_state.state_of_residency, "contiguous")
                 borrower_type = "new" if "new" in str(st.session_state.borrower_type).lower() else "old"
 
@@ -198,6 +205,7 @@ def display_plan_comparison() -> None:
         servicer_estimate=servicer_est
     )
 
+
 @st.dialog("Before you begin!")
 def spawn_loan_input_checklist() -> None:
     st.markdown("Gathering all of your loan details can be a headache, so we've provided a small checklist to make sure you have everything in one place before you begin.")
@@ -217,6 +225,7 @@ def spawn_loan_input_checklist() -> None:
 
     # Option 2
     st.markdown("Press the '**x**' in the top-right corner of this box to continue.")
+
 
 @st.dialog("Want to get connected?")
 def spawn_get_connected_popup() -> None:
