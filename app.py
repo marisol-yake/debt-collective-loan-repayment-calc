@@ -202,10 +202,10 @@ def display_plan_comparison() -> None:
 def spawn_loan_input_checklist() -> None:
     st.markdown("Gathering all of your loan details can be a headache, so we've provided a small checklist to make sure you have everything in one place before you begin.")
 
-    st.checkbox("**Student-Loan Servicer** or **FSA** Payment Plan Estimate in USD ($).")
-    st.checkbox("**Total Outstanding Loan Amount** in USD ($).")
+    st.checkbox("**Student-Loan Servicer** or **FSA** Payment Plan Estimate in USD ($)")
+    st.checkbox("**Total Outstanding Loan Amount** in USD ($)")
     st.checkbox("Your Loan's **Annual Interest Rate** as a Percentage (%)")
-    st.checkbox("Your **Adjusted Gross Income** in USD ($).")
+    st.checkbox("Your **Adjusted Gross Income** in USD ($)")
     st.checkbox("Does Your Loan Originate **Before** or **After** July 1st, 2014?")
 
     # TODO: Decide which is less tedious / more intuitive
