@@ -120,8 +120,6 @@ def calculate_standard_payment(balance: USD, interest: InterestRate, years: int 
     return result
 
 
-# TODO: Remove this function
-# WHY: calculate_standard_payment() == _calculate_fixed_payment() 
 def _calculate_fixed_payment(balance: USD, interest: InterestRate, years: int = 12) -> USDPaymentAmount:
     r = (interest / 100) / 12
     n = years * 12
