@@ -4,7 +4,7 @@ import math
 from typing import Any, Union
 import streamlit as st
 
-type Number = Union[int, float]
+
 type USD = Union[int, float]
 type InterestRate = float
 type BorrowerType = str
@@ -19,24 +19,6 @@ type PaymentPlanDetails = dict[str, Any]
 ###########################################################################
 # Custom Application Logic
 ###########################################################################
-def difference_calculation_between(first_term: Number, second_term: Number) -> tuple[Number, Number]:
-    difference = first_term - second_term
-
-    # Handles edge cases where comparison is 0 / 0
-    if second_term == 0:
-        # Case 1: Where selected plan payment amount = 0 and servicer estimate = 0
-        if first_term == 0:
-            percent_diff = 0.0
-        # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
-        else:
-            percent_diff = 1.0  
-    else:
-        # Case 3: Both estimates are not equal to 0
-        percent_diff = difference / second_term
-
-    return difference, percent_diff
-
-
 def _format_flagged_diff_display_value(difference: USD, percent_difference: float) -> str:
     # If the percent difference is greater than or equal to 20% in either direction
     # Mark red, known as a "flagged difference"
@@ -70,7 +52,19 @@ def display_flagged_diff(*, selected_plan_est: USD, servicer_estimate: USD) -> N
     elif servicer_estimate is None:
         servicer_estimate = 0
 
-    difference, percent_diff = difference_calculation_between(servicer_estimate, selected_plan_est)
+    difference = servicer_estimate - selected_plan_est
+
+    # Handles edge cases where comparison is 0 / 0
+    if selected_plan_est == 0:
+        # Case 1: Where selected plan payment amount = 0 and servicer estimate = 0
+        if servicer_estimate == 0:
+            percent_diff = 0.0
+        # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
+        else:
+            percent_diff = 1.0  
+    else:
+        # Case 3: Both estimates are not equal to 0
+        percent_diff = difference / selected_plan_est
 
     with st.container(key="metric-card"):
         display_value = _format_flagged_diff_display_value(
@@ -120,6 +114,8 @@ def calculate_standard_payment(balance: USD, interest: InterestRate, years: int 
     return result
 
 
+# TODO: Remove this function
+# WHY: calculate_standard_payment() == _calculate_fixed_payment() 
 def _calculate_fixed_payment(balance: USD, interest: InterestRate, years: int = 12) -> USDPaymentAmount:
     r = (interest / 100) / 12
     n = years * 12
@@ -252,34 +248,9 @@ def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_siz
     }
 
 
-# NOTE: Non-EDCAP Formula
 def calculate_REPAYE(balance: USD, interest: InterestRate, agi: USD, household_size: int, state: str, borrower_type: BorrowerType) -> USD:
     ibr_payments = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
     return ibr_payments * 0.666
-
-
-# NOTE: Non-EDCAP Formula
-def calculate_SAVE(balance: USD, agi: USD, household_size: int, state: str, loan_ed_level: str = "undergrad"):
-    """
-    For a family size of 1 in the Lower 48 States, the poverty rate is $15650,
-    225% of that is $35212.5
-    Your income of $50000 subtract $35212.5 = $14787.5 (your discretionary income).
-    Your grad loans make up 50.00% of your total loans. 50.00% of 5% = 2.50%, which is added to the original 5% to get 7.50%, the percentage of your discretionary income you would pay towards your loans.
-    7.50% of your discretionary income is $1109, which is theoretically what you would pay towards your loans over 12 months.
-    $1109 divided by 12 gives us your estimated monthly payment of $92
-    """
-    poverty = _get_poverty_guideline(state, household_size)
-    poverty225 = poverty * 2.25
-    discretionary_income = max((agi - poverty225), 0)
-    # grad_loan_diff, grad_loan_percent = difference_calculation_between(balance, second_term=)
-    # grad_loan_adjustment_factor = grad_loan_percent * 0.05
-    # base_save_percent = 0.05
-    # total_annual_due = discretionary_income * (base_save_percent + grad_loan_adjustment_factor)
-    # monthly_payment_due = total_annual_due / 12 
-
-    # TODO: How to handle loan_ed_level?
-    # has_grad_loan = T/F?
-    # handling undergrad and grad loan balances?
 
 
 def _get_RAP_percentage(agi: USD) -> float:
