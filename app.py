@@ -14,7 +14,9 @@ def init_session_state() -> None:
         "rap": 0.0,
         "std": 0.0,
 
-    "input_checklist_timer_done": False
+    "input_checklist_timer_done": False,
+    "AGI_help_msg": "AGI = (**Hours Worked per Week** x **Hourly Pay**) x **Weeks worked per Year**\n\nExample:\n\nAGI = (**40 hours per week** x **\\$21 per hour**) X **52 weeks**   ->   AGI = **\\$43,680**",
+    "interest_rate_help_msg": "For example **7.84%** would be entered as **7.84**."
     }
 
     for key, value in defaults.items():
@@ -80,7 +82,7 @@ def configure_page_title() -> None:
 
     st.markdown("## Are your servicer's monthly repayment estimates WAY off from what they should be?")
     st.subheader("A tool built *by* debtors, *for* debtors.")
-    st.caption("Built with :heart: by **Marisol Yake** as part of the **Debt Collective's Payments Pause Campaign Data Team**.")
+    st.caption("Built with :heart: by **Marisol** as part of the **Debt Collective's Payments Pause Campaign**.")
     st.markdown("This is a calculator to help debtors determine how far off their student loan servicer's estimates are from what they should be.")
     st.markdown("Uses the trustworthy process of the [EDCAP calculator](https://www.edcapny.org/resources-for-borrowers/repayment-plan-calculator/), and your estimated repayment amount, to describe exactly **how far** off.")
 
@@ -103,11 +105,11 @@ def configure_input_sidebar() -> None:
                             key="total_balance")
             st.number_input("Annual Interest Rate (%):",
                             min_value=0.0, value=None, step=1.0, placeholder="0.00%",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                            help=st.session_state.interest_rate_help_msg,
                             key="annual_interest_rate")
             st.number_input("Adjusted Gross Income (AGI) ($):",
                             min_value=0.0, value=None, step=1.0, placeholder="0.00",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                            help=st.session_state.AGI_help_msg,
                             key="agi")
             st.number_input("Household Size (For IBR, PAYE, and ICR):",
                             min_value=0, value=None, step=1, placeholder="0",
@@ -212,8 +214,10 @@ def spawn_loan_input_checklist() -> None:
 
     st.checkbox("**Student-Loan Servicer** or **FSA** Payment Plan Estimate in USD ($)")
     st.checkbox("**Total Outstanding Loan Amount** in USD ($)")
-    st.checkbox("Your Loan's **Annual Interest Rate** as a Percentage (%)")
-    st.checkbox("Your **Adjusted Gross Income** in USD ($)")
+    st.checkbox("Your Loan's **Annual Interest Rate** as a Percentage (%)",
+                help=st.session_state.interest_rate_help_msg)
+    st.checkbox("Your **Adjusted Gross Income** (AGI) in USD ($)",
+                help=st.session_state.AGI_help_msg)
     st.checkbox("Does Your Loan Originate **Before** or **After** July 1st, 2014?")
 
     # TODO: Decide which is less tedious / more intuitive
@@ -265,7 +269,9 @@ def spawn_get_connected_popup() -> None:
 
 def configure_share_button() -> None:
     # NOTE: Prevent the button from being pressed too early?
-    st.button("Share Results", on_click=spawn_get_connected_popup, type="primary")
+    st.button("Share Results",
+              on_click=spawn_get_connected_popup,
+              type="primary")
 
 
 def configure_footer() -> None:
