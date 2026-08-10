@@ -39,7 +39,7 @@
   <p align="center">
     A tool made <i>by</i> debtors, <i>for</i> debtors!
     <br /><br />
-    This is our very own student loan repayment calculator. Made for estimating how much money you should be saving on Income-Driven Repayment (IDR) plans, and how to get connected to the Debt Collective's Campaign to call on legislators for a payment pause!
+    Our very own student loan repayment calculator. Made for estimating how much money you should be saving on Income-Driven Repayment (IDR) plans, and how to get connected to the Debt Collective's Campaign to call on legislators for a payment pause!
     <br />
     <br />
     <a href="https://github.com/marisol-yake/debt-collective-loan-repayment-calc"><strong>Explore the docs »</strong></a>
@@ -213,9 +213,9 @@ Project Link: [https://github.com/marisol-yake/debt-collective-loan-repayment-ca
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* []()
-* []()
-* []()
+* Big thank you for the folks who worked on the [EDCAP Calculator](), our work would not have been possible without you.
+* Shoutouts to everyone involved in the [Debt Collective]() Payment Pause Campaign, team work makes the dream work.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
