@@ -39,7 +39,9 @@
   <p align="center">
     A tool made <i>by</i> debtors, <i>for</i> debtors!
     <br /><br />
-    Our very own student loan repayment calculator. Made for estimating how much money you should be saving on Income-Driven Repayment (IDR) plans, and how to get connected to the Debt Collective's Campaign to call on legislators for a payment pause!
+    Our very own student loan repayment calculator.
+    <br /><br />
+    Made to estimate how much money you should be saving on Income-Driven Repayment (IDR) plans, and how to get connected to the Debt Collective's Campaign to call on legislators for a payment pause!
     <br />
     <br />
     <a href="https://github.com/marisol-yake/debt-collective-loan-repayment-calc"><strong>Explore the docs »</strong></a>
@@ -111,6 +113,7 @@ To get a local copy up and running follow these simple example steps.
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
+
 * Python 3.13
 
 
@@ -202,7 +205,7 @@ Distributed under the AGPL-3.0. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Marisol Yake (she / her) - [@twitter_handle](https://twitter.com/twitter_handle) - marisol.yake@outlook.com
+Marisol Yake (she / her) - marisol.yake@outlook.com
 
 Project Link: [https://github.com/marisol-yake/debt-collective-loan-repayment-calc](https://github.com/marisol-yake/debt-collective-loan-repayment-calc)
 
