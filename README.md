@@ -213,8 +213,8 @@ Project Link: [https://github.com/marisol-yake/debt-collective-loan-repayment-ca
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* Big thank you for the folks who worked on the [EDCAP Calculator](), our work would not have been possible without you.
-* Shoutouts to everyone involved in the [Debt Collective]() Payment Pause Campaign, team work makes the dream work.
+* Big thank you for the folks who worked on the [EDCAP Calculator](https://www.edcapny.org/resources-for-borrowers/student-loan-pathway/repayment-plan-calculator/), our work would not have been possible without you.
+* Shoutouts to everyone involved in the [Debt Collective](https://debtcollective.org/) Payment Pause Campaign, team work makes the dream work.
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
