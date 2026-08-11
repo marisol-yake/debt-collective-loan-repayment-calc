@@ -158,10 +158,22 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- [x] Get hosted on streamlit community cloud
+- [x] Create prototype of calculator (placeholder variables)
+  - [x] Flag differences +-20% relative to selected payment plan.
+  - [x] Handle division by zero errors
+- [x] Translate EDCAP calculator logic (JS >> Python)
+- [x] Create working prototype of calculator (EDCAP result parity)
+- [x] Implement REPAYE plan calculations
+- [ ] Implement SAVE plan calculations
+- [ ] Verify calculator logic against credible sources
+- [ ] Add calculation explanations (hover-hint?)
+- [ ] Add AGI explainer (hover-hint?)
+- [ ] Add finalized campaign language
+- [ ] Add link to Data Privacy Policy
+- [ ] Implement data collection procedure
+
+<br />
 
 See the [open issues](https://github.com/marisol-yake/debt-collective-loan-repayment-calc/issues) for a full list of proposed features (and known issues).
 
