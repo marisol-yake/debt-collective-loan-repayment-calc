@@ -158,9 +158,11 @@ def configure_input_sidebar() -> None:
 
 def configure_plan_selection_menu() -> None:
     st.selectbox("**⬇️ Select a Payment Plan for Comparison**:",
-                 options=["Traditional Repayment Plan", "Income-Based Repayment (IBR)",
-                 "Income-Contingent Repayment (ICR)", "Pay As You Earn (PAYE)",
-                 "Revised Pay As You Earn (REPAYE)", "Repayment Assistance Plan (RAP)"],
+                 options=[
+                     # TODO: SAVE goes here
+                     "Revised Pay As You Earn (REPAYE)", "Pay As You Earn (PAYE)",
+                     "Income-Based Repayment (IBR)", "Income-Contingent Repayment (ICR)",
+                     "Repayment Assistance Plan (RAP)", "Traditional Repayment Plan"],
                  index=None, placeholder="Choose a Repayment Plan", key="comparison_plan")
 
 
