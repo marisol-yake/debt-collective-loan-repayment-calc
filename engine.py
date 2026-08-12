@@ -165,11 +165,18 @@ def _get_chart_ICR(household_size: int) -> Chart:
 def _find_surrounding_AGIs(chart: Chart, agi: USD) -> tuple[ChartEntry, ChartEntry]:
     lower, higher = chart[0], chart[-1]
 
-    for idx, entry in enumerate(chart):
-        if agi >= chart[idx]["agi"] and agi < chart[idx + 1]["agi"]:
-            lower = chart[idx]
-            higher = chart[idx + 1]
-            break
+    # Edge Case 1: If AGI is less than or equal to the lowest entry
+    if agi <= chart[0]["agi"]:
+        return chart[0], chart[0]
+
+    # Edge Case 2: If AGI exceeds or equals the highest entry (e.g., $5,000,000)
+    if agi >= chart[-1]["agi"]:
+        # Return the highest entry for both boundaries
+        return chart[-1], chart[-1]
+
+    for current_entry, next_entry in zip(chart, chart[1:]):
+        if current_entry["agi"] <= agi < next_entry["agi"]:
+            return current_entry, next_entry
 
     return lower, higher
 
