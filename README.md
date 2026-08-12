@@ -165,9 +165,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [x] Translate EDCAP calculator logic, 1-to-1 (JS &rarr; Python)
 - [x] Create working prototype of calculator (EDCAP result parity)
 - [x] Implement REPAYE plan calculations
-- [ ] Implement SAVE plan calculations
+- [x] Implement SAVE plan calculations
   - [x] Implement SAVE calculation logic
-  - [ ] Tweak UI to accommodate input
+  - [x] Tweak UI to accommodate input
 - [x] Verify calculator logic against credible sources
   - Using the most credible resources I could find.
   - I am not a legal nor tax professional.
