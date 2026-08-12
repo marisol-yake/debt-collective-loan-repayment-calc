@@ -303,6 +303,14 @@ def configure_share_button() -> None:
     st.button("Share Results", on_click=spawn_get_connected_popup, type="primary")
 
 
+def spawn_payment_plan_explainer_popup() -> None:
+    ...
+
+
+def configure_calculation_explainer_button() -> None:
+    ...
+
+
 def configure_footer() -> None:
     st.divider()
     st.markdown("**Disclaimers**")
