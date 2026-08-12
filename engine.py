@@ -419,7 +419,7 @@ def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad
     poverty225 = poverty * 2.25
     discretionary_income = max((agi - poverty225), 0)
     total_loan_balance = balance + grad_loan_balance
-    grad_loan_burden_percent = max((calculate_difference(grad_loan_balance, total_loan_balance)[1] * 0.05), 0)
+    grad_loan_burden_percent = max((calculate_difference(total_loan_balance, grad_loan_balance)[1] * 0.05), 0)
     percent = 0.05 + grad_loan_burden_percent
 
     annual_payment = discretionary_income * percent
