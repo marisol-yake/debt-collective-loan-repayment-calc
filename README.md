@@ -162,7 +162,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [x] Create prototype of calculator (placeholder variables)
   - [x] Flag differences +-20% relative to selected payment plan.
   - [x] Handle division by zero errors
-- [x] Translate EDCAP calculator logic (JS >> Python)
+- [x] Translate EDCAP calculator logic, 1-to-1 (JS &rarr; Python)
 - [x] Create working prototype of calculator (EDCAP result parity)
 - [x] Implement REPAYE plan calculations
 - [ ] Implement SAVE plan calculations
