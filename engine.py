@@ -32,7 +32,7 @@ def calculate_difference(a: Number, b: Number) -> tuple[Number, Number]:
             percent_difference = 1.0
     else:
         # Case 3: Both estimates are not equal to 0
-        percent_difference = difference / b
+        percent_difference = difference / a
 
     return difference, percent_difference
 
