@@ -188,7 +188,7 @@ def configure_plan_selection_menu() -> None:
     st.selectbox("**⬇️ Select a Payment Plan for Comparison**:",
                  options=[
                      "Saving on a Valuable Education (SAVE)", "Revised Pay As You Earn (REPAYE)",
-                     "Repayment Assistance Plan (RAP)", "Pay As You Earn (PAYE)",
+                     "Pay As You Earn (PAYE)", "Repayment Assistance Plan (RAP)",
                      "Income-Based Repayment (IBR)", "Income-Contingent Repayment (ICR)",
                      "Traditional Repayment Plan"],
                  index=None, placeholder="Choose a Repayment Plan", key="comparison_plan")
@@ -256,6 +256,10 @@ def spawn_loan_input_checklist() -> None:
 
     # Option 2
     st.markdown("Press the '**x**' in the top-right corner of this box to continue.")
+
+    # Option 3
+    # Make 'x' in the top-right corner into bordered box, colored-in red with a white 'x'
+    # TODO: Implement this option
 
 
 @st.dialog("Want to get connected?")
