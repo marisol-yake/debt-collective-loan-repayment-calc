@@ -279,8 +279,7 @@ def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_siz
     """
     **Monthly Payment**:
     - Discretionary Income = Your Income – (150% × HHS federal poverty guidelines)
-    - Reduced by $50 for each dependent on your federal tax return
-    - Total monthly payment may not be less than $10
+    - Total monthly payment may not be less than 10% of your Discretionary Income
 
     **Time Frame**:
     - First available to borrowers in 2012, PAYE is a federal income-driven repayment plan available to certain U.S. student loan borrowers.
@@ -300,7 +299,7 @@ def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_siz
     forgiveness_years = 20
 
     annual_payment = discretionary_income * percent
-    monthly_payment = annual_payment / 12
+    monthly_payment = (annual_payment / 12)
     standard_monthly = calculate_standard_payment(balance, interest)
     
     if (monthly_payment > standard_monthly):
@@ -343,10 +342,6 @@ def calculate_REPAYE(balance: USD, interest: InterestRate, agi: USD, household_s
     
     if (monthly_payment > standard_monthly):
         monthly_payment = standard_monthly
-
-    # NOTE: Previous calculation
-    # ibr_payments = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
-    # return ibr_payments * 0.666
 
     return monthly_payment
 
