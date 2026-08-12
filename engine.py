@@ -29,7 +29,7 @@ def calculate_difference(a: Number, b: Number) -> tuple[Number, Number]:
             percent_difference = 0.0
         # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
         else:
-            percent_difference = 1.0  
+            percent_difference = 1.0
     else:
         # Case 3: Both estimates are not equal to 0
         percent_difference = difference / b
@@ -389,7 +389,7 @@ def calculate_RAP(agi: USD, num_of_dependents: int) -> PaymentPlanDetails:
     }
 
 
-def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad_school_loan_balance: USD = 0):
+def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad_loan_balance: USD = 0):
     """
     **Monthly Payment**:
     - Multiply 2.25 times your poverty level number
@@ -411,8 +411,8 @@ def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad
     poverty = _get_poverty_guideline(state, household_size)
     poverty225 = poverty * 2.25
     discretionary_income = max((agi - poverty225), 0)
-    total_loan_balance = balance + grad_school_loan_balance
-    grad_loan_burden_percent = max((calculate_difference(grad_school_loan_balance, total_loan_balance)[1] * 0.05), 0)
+    total_loan_balance = balance + grad_loan_balance
+    grad_loan_burden_percent = max((calculate_difference(grad_loan_balance, total_loan_balance)[1] * 0.05), 0)
     percent = 0.05 + grad_loan_burden_percent
 
     annual_payment = discretionary_income * percent
@@ -421,7 +421,7 @@ def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad
     return monthly_payment
 
 
-def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, household_size: int, num_of_dependents: int, state: str, borrower_type: BorrowerType):
+def calculate_all_plans(*, balance: USD, grad_loan_balance: USD, interest: InterestRate, agi: USD, household_size: int, num_of_dependents: int, state: str, borrower_type: BorrowerType):
 
     # TODO: Implement this
     # if not balance or not interest or not agi or not household_size or num_of_dependents is None:
@@ -440,6 +440,7 @@ def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, house
     paye = calculate_PAYE(balance, interest, agi, household_size, state)["monthly_payment"]
     repaye = calculate_REPAYE(balance, interest, agi, household_size, state, borrower_type)
     rap = calculate_RAP(agi, num_of_dependents)["monthly_payment"]
+    save = calculate_SAVE(agi, household_size, state, balance, grad_loan_balance)
     std = calculate_standard_payment(balance, interest, years=15)
 
     # NOTE: These don't end up in the relevant calculator results
@@ -455,4 +456,4 @@ def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, house
     # total_paid = standard_monthly_payment * 12 * payback_years
     # starting_interest = (balance * (interest / 100)) / 12
 
-    return ibr, icr, paye, repaye, rap, std
+    return ibr, icr, paye, repaye, rap, save, std
