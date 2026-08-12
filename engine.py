@@ -430,14 +430,16 @@ def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad
 
 def calculate_all_plans(*, balance: USD, grad_loan_balance: USD, interest: InterestRate, agi: USD, household_size: int, num_of_dependents: int, state: str, borrower_type: BorrowerType):
     if grad_loan_balance > 0:
-        balance = balance + grad_loan_balance
+        total_balance = balance + grad_loan_balance
+    else:
+        total_balance = balance
 
-    ibr = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
-    icr = calculate_ICR(balance, interest, agi, household_size, state)["monthly_payment"]
-    paye = calculate_PAYE(balance, interest, agi, household_size, state)["monthly_payment"]
-    repaye = calculate_REPAYE(balance, interest, agi, household_size, state, borrower_type)
+    ibr = calculate_IBR(total_balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
+    icr = calculate_ICR(total_balance, interest, agi, household_size, state)["monthly_payment"]
+    paye = calculate_PAYE(total_balance, interest, agi, household_size, state)["monthly_payment"]
+    repaye = calculate_REPAYE(total_balance, interest, agi, household_size, state, borrower_type)
     rap = calculate_RAP(agi, num_of_dependents)["monthly_payment"]
     save = calculate_SAVE(agi, household_size, state, balance, grad_loan_balance)
-    std = calculate_standard_payment(balance, interest, years=15)
+    std = calculate_standard_payment(total_balance, interest, years=15)
 
     return ibr, icr, paye, repaye, rap, save, std
