@@ -12,9 +12,11 @@ def init_session_state() -> None:
         "paye": 0.0,
         "repaye": 0.0,
         "rap": 0.0,
+        "save": 0.0,
         "std": 0.0,
 
-    "input_checklist_timer_done": False
+    "input_checklist_timer_done": False,
+    "grad_loan_balance": 0.0
     }
 
     for key, value in defaults.items():
@@ -88,42 +90,66 @@ def configure_page_title() -> None:
 def configure_input_sidebar() -> None:
     # Inputs get stored as st.session_state.key
     with st.sidebar:
+        has_grad_loans = st.checkbox("Do you have graduate school loans?",
+                        key="grad_school_loans_flag")
+
         # Using a streamlit form prevents calculations from happening automatically
         # This prevents unnecessary computations and makes intended-use clearer
         with st.form(key="input_form"):
             # Accepts all user inputs for loan repayment calculations
-            # Setting value=None means that st.number_input is already cleared for users automatically. 
-            st.number_input("Servicer Monthly Payment Estimate ($):",
-                            min_value=0.0, value=None, step=1.0, placeholder="0.00",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                            key="servicer_estimate")
-            st.number_input("Total Loan Balance ($):",
-                            min_value=0.0, value=None, step=1.0, placeholder="0.00",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                            key="total_balance")
-            st.number_input("Annual Interest Rate (%):",
-                            min_value=0.0, value=None, step=1.0, placeholder="0.00%",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                            key="annual_interest_rate")
+            # Setting value=None means that st.number_input is already cleared for users automatically.
+
             st.number_input("Adjusted Gross Income (AGI) ($):",
-                            min_value=0.0, value=None, step=1.0, placeholder="0.00",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                            key="agi")
-            st.number_input("Household Size (For IBR, PAYE, and ICR):",
+                                min_value=0.0, value=None, step=1.0, placeholder="$0.00",
+                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                key="agi")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.number_input("Servicer Monthly Estimate ($):",
+                                min_value=0.0, value=None, step=1.0, placeholder="$0.00",
+                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                key="servicer_estimate")
+                
+                st.number_input("Household Size:",
+                                min_value=0, value=None, step=1, placeholder="0",
+                                help="Used in calculations for IBR, PAYE, and ICR",
+                                key="household_size")
+                st.selectbox("State of Residency:",
+                             options=["Contiguous U.S.", "Alaska", "Hawaii"],
+                             help="If you don't live in **Alaska** or **Hawaii**, you can use **Contiguous U.S.**",
+                             key="state_of_residency")
+
+            with col2:
+                st.number_input("Annual Interest Rate (%):",
+                                min_value=0.0, value=None, step=1.0, placeholder="0.00%",
+                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                key="annual_interest_rate")
+
+                st.number_input("Number of Dependents:",
                             min_value=0, value=None, step=1, placeholder="0",
-                            help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                            key="household_size")
-            st.number_input("Number of Dependents (Claimed on taxes - Only For RAP):",
-                            min_value=0, value=None, step=1, placeholder="0",
+                            help="Claimed on taxes. Only for RAP calculation.",
                             key="num_of_dependents")
-            st.selectbox("State of Residency:",
-                         options=["Contiguous U.S.", "Alaska", "Hawaii"],
-                         help="If you don't live in **Alaska** or **Hawaii**, you can use **Contiguous U.S.**",
-                         key="state_of_residency")
-            st.selectbox("Borrower Type (for IBR):",
-                         options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
-                         help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                         index=None, placeholder="Choose a Borrower Type", key="borrower_type")
+                st.selectbox("Borrower Type:",
+                            options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
+                            help="Used for IBR calculations.",
+                            index=None, placeholder="Choose a Borrower Type", key="borrower_type")
+
+            # Grad School Loan toggle checkbox
+            # Can only loan dynamically if checkbox is not within form
+            if not has_grad_loans:
+                st.number_input("Total Loan Balance ($):",
+                                min_value=0.0, value=None, step=1.0, placeholder="$0.00",
+                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                key="total_balance")
+            else:
+                st.number_input("Undergraduate Loan Balance ($):",
+                                min_value=0.0, value=None, step=1.0, placeholder="$0.00",
+                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                key="total_balance")
+                st.number_input("Graduate School Loan Balance ($):",
+                                min_value=0.0, value=None, step=1.0, placeholder="$0.00",
+                                help="Loan balance from graduate school studies.",
+                                key="grad_loan_balance")
 
             submitted = st.form_submit_button("Calculate", width="stretch", type="primary")
 
@@ -136,6 +162,7 @@ def configure_input_sidebar() -> None:
                 }
 
                 balance = init_sensible_default_for(st.session_state.total_balance, value=0.0)
+                grad_loan_balance = init_sensible_default_for(st.session_state.grad_loan_balance, value=0.0)
                 interest = init_sensible_default_for(st.session_state.annual_interest_rate, value=0.0)
                 agi = init_sensible_default_for(st.session_state.agi, value=0.0)
                 household_size = init_sensible_default_for(st.session_state.household_size, value=0)
@@ -145,8 +172,9 @@ def configure_input_sidebar() -> None:
 
                 # TODO: Refactor so not every plan is calculated all at once
                 # Please forgive me, I'm in a hurry
-                st.session_state.ibr, st.session_state.icr, st.session_state.paye, st.session_state.repaye, st.session_state.rap, st.session_state.std = engine.calculate_all_plans(
+                st.session_state.ibr, st.session_state.icr, st.session_state.paye, st.session_state.repaye, st.session_state.rap, st.session_state.save, st.session_state.std = engine.calculate_all_plans(
                     balance=balance,
+                    grad_loan_balance=grad_loan_balance,
                     interest=interest,
                     agi=agi,
                     household_size=household_size,
@@ -159,10 +187,10 @@ def configure_input_sidebar() -> None:
 def configure_plan_selection_menu() -> None:
     st.selectbox("**⬇️ Select a Payment Plan for Comparison**:",
                  options=[
-                     # TODO: SAVE goes here
-                     "Revised Pay As You Earn (REPAYE)", "Pay As You Earn (PAYE)",
+                     "Saving on a Valuable Education (SAVE)", "Revised Pay As You Earn (REPAYE)",
+                     "Repayment Assistance Plan (RAP)", "Pay As You Earn (PAYE)",
                      "Income-Based Repayment (IBR)", "Income-Contingent Repayment (ICR)",
-                     "Repayment Assistance Plan (RAP)", "Traditional Repayment Plan"],
+                     "Traditional Repayment Plan"],
                  index=None, placeholder="Choose a Repayment Plan", key="comparison_plan")
 
 
@@ -174,6 +202,7 @@ def display_plan_comparison() -> None:
         "Pay As You Earn (PAYE)": st.session_state.paye,
         "Revised Pay As You Earn (REPAYE)": st.session_state.repaye,
         "Repayment Assistance Plan (RAP)": st.session_state.rap,
+        "Saving on a Valuable Education (SAVE)": st.session_state.save,
         "Traditional Repayment Plan": st.session_state.std
     }
 
