@@ -429,18 +429,8 @@ def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad
 
 
 def calculate_all_plans(*, balance: USD, grad_loan_balance: USD, interest: InterestRate, agi: USD, household_size: int, num_of_dependents: int, state: str, borrower_type: BorrowerType):
-
-    # TODO: Implement this
-    # if not balance or not interest or not agi or not household_size or num_of_dependents is None:
-    #     # MissingCalculatorParameters
-    #     # alert("Please fill in all fields with valid values.")
-    #     return
-
-    # TODO: Implement this
-    # if not borrower_type:
-    #     # MissingBorrowerType
-    #     # alert("Please select a borrower type for IBR calculation.");
-    #     return
+    if grad_loan_balance > 0:
+        balance = balance + grad_loan_balance
 
     ibr = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
     icr = calculate_ICR(balance, interest, agi, household_size, state)["monthly_payment"]
@@ -449,18 +439,5 @@ def calculate_all_plans(*, balance: USD, grad_loan_balance: USD, interest: Inter
     rap = calculate_RAP(agi, num_of_dependents)["monthly_payment"]
     save = calculate_SAVE(agi, household_size, state, balance, grad_loan_balance)
     std = calculate_standard_payment(balance, interest, years=15)
-
-    # NOTE: These don't end up in the relevant calculator results
-    # NOTE: but I'm keeping them just in case
-    # def _getPaybackPeriod(balance):
-    #     if (balance < 25000): return 10
-    #     if (balance < 50000): return 15
-    #     if (balance < 100000): return 20
-    #     return 25
-
-    # payback_years = _getPaybackPeriod(balance)
-    # standard_monthly_payment = _calculate_fixed_payment(balance, interest, payback_years)
-    # total_paid = standard_monthly_payment * 12 * payback_years
-    # starting_interest = (balance * (interest / 100)) / 12
 
     return ibr, icr, paye, repaye, rap, save, std
