@@ -200,7 +200,8 @@ def calculate_ICR(balance: USD, interest: InterestRate, agi: USD, household_size
     - Direct PLUS Loans made to students
     - Direct Consolidation Loans
 
-    ref: https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/icr
+    **References**:
+    - https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/icr
     """
     poverty_level = _get_poverty_guideline(state, household_size)
     discretionary_income = max(agi - poverty_level, 0)
@@ -251,7 +252,8 @@ def calculate_IBR(balance: USD, interest: InterestRate, agi: USD, household_size
     - all PLUS Loans made to students
     - Consolidation Loans (Direct or FFEL) that do not include PLUS loans (Direct or FFEL) made to parents
 
-    ref: https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/ibr1
+    **References**:
+    - https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/ibr1
     """
     poverty = _get_poverty_guideline(state, household_size)
     poverty150 = poverty * 1.5
@@ -290,7 +292,8 @@ def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_siz
     - Only Federal Direct loans qualify for PAYE. Other federal loan types (Federal Family Education Loans, Federal Perkins, and Health Professions Student Loans) disbursed after October 1, 2007, are eligible if consolidated into a Direct Consolidation loan.
     - If the payments due under PAYE are less than the payments that would be due under a standard 10-year repayment plan, you have a partial financial hardship (PFH). A rule of thumb: If your debt exceeds your income, you likely demonstrate a PFH under PAYE.
 
-    ref: https://www.vin.com/studentdebtcenter/default.aspx?pid=14352&catId=74141&id=7250325
+    **References**:
+    - https://www.vin.com/studentdebtcenter/default.aspx?pid=14352&catId=74141&id=7250325
     """
     poverty = _get_poverty_guideline(state, household_size)
     poverty150 = poverty * 1.5
@@ -327,8 +330,9 @@ def calculate_REPAYE(balance: USD, interest: InterestRate, agi: USD, household_s
     **Eligible Loans**:
     - All Direct Loan borrowers
 
-    ref: https://studentloanborrowerassistance.org/the-revised-pay-as-you-earn-repaye-plan-is-now-available/
-    ref: https://fsapartners.ed.gov/fsa-print/publication/8658
+    **References**:
+    - https://studentloanborrowerassistance.org/the-revised-pay-as-you-earn-repaye-plan-is-now-available/
+    - https://fsapartners.ed.gov/fsa-print/publication/8658
     """
     poverty = _get_poverty_guideline(state, household_size)
     poverty150 = poverty * 1.5
@@ -376,7 +380,8 @@ def calculate_RAP(agi: USD, num_of_dependents: int) -> PaymentPlanDetails:
     - Direct PLUS loans for graduate or professional students
     - Direct Consolidation loans that do not include a Parent PLUS loan
 
-    ref: https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/rap
+    **References**:
+    - https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/rap
     """
     percentage = _get_RAP_percentage(agi)
     monthly_payment = (agi * percentage) / 12 - (50 * num_of_dependents)
@@ -407,8 +412,9 @@ def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad
     - Direct PLUS Loans made to graduate or professional students, and
     - Direct Consolidation Loans that did not repay any PLUS loans made to parents
 
-    ref: https://www.law.uchicago.edu/save-repayment-plan-faq
-    ref: https://www.reddit.com/r/StudentLoans/comments/16cgnup/calculate_save_plan_payment_how_to/
+    **References**:
+    - https://www.law.uchicago.edu/save-repayment-plan-faq
+    - https://www.reddit.com/r/StudentLoans/comments/16cgnup/calculate_save_plan_payment_how_to/
     """
     poverty = _get_poverty_guideline(state, household_size)
     poverty225 = poverty * 2.25
