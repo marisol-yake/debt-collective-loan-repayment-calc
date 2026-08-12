@@ -4,8 +4,8 @@ import math
 from typing import Any, Union
 import streamlit as st
 
-
-type USD = Union[int, float]
+type Number = Union[int, float]
+type USD = Number
 type InterestRate = float
 type BorrowerType = str
 type Factor = float
@@ -19,6 +19,24 @@ type PaymentPlanDetails = dict[str, Any]
 ###########################################################################
 # Custom Application Logic
 ###########################################################################
+def calculate_difference(a: Number, b: Number) -> tuple[Number, Number]:
+    difference = a - b
+
+    # Handles edge cases where comparison is 0 / 0
+    if b == 0:
+        # Case 1: Where selected plan payment amount = 0 and servicer estimate = 0
+        if a == 0:
+            percent_difference = 0.0
+        # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
+        else:
+            percent_difference = 1.0  
+    else:
+        # Case 3: Both estimates are not equal to 0
+        percent_difference = difference / b
+
+    return difference, percent_difference
+
+
 def _format_flagged_diff_display_value(difference: USD, percent_difference: float) -> str:
     # If the percent difference is greater than or equal to 20% in either direction
     # Mark red, known as a "flagged difference"
@@ -52,19 +70,7 @@ def display_flagged_diff(*, selected_plan_est: USD, servicer_estimate: USD) -> N
     elif servicer_estimate is None:
         servicer_estimate = 0
 
-    difference = servicer_estimate - selected_plan_est
-
-    # Handles edge cases where comparison is 0 / 0
-    if selected_plan_est == 0:
-        # Case 1: Where selected plan payment amount = 0 and servicer estimate = 0
-        if servicer_estimate == 0:
-            percent_diff = 0.0
-        # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
-        else:
-            percent_diff = 1.0  
-    else:
-        # Case 3: Both estimates are not equal to 0
-        percent_diff = difference / selected_plan_est
+    difference, percent_diff = calculate_difference(servicer_estimate, selected_plan_est)
 
     with st.container(key="metric-card"):
         display_value = _format_flagged_diff_display_value(
@@ -114,8 +120,6 @@ def calculate_standard_payment(balance: USD, interest: InterestRate, years: int 
     return result
 
 
-# TODO: Remove this function
-# WHY: calculate_standard_payment() == _calculate_fixed_payment() 
 def _calculate_fixed_payment(balance: USD, interest: InterestRate, years: int = 12) -> USDPaymentAmount:
     r = (interest / 100) / 12
     n = years * 12
@@ -171,12 +175,32 @@ def _find_surrounding_AGIs(chart: Chart, agi: USD) -> tuple[ChartEntry, ChartEnt
 
 
 def calculate_ICR(balance: USD, interest: InterestRate, agi: USD, household_size: int, state: str) -> PaymentPlanDetails:
+    """
+    **Monthly Payment**:
+    - Your monthly payment will be the lesser of
+        - 20 percent of discretionary income, or
+        - the amount you would pay on a repayment plan with a fixed payment over 12 years, adjusted according to your income.
+    - Payments are recalculated each year and are based on your updated income, family size, and the total amount of your Direct Loans.
+    - You must update your income and family size each year, even if they haven’t changed.
+    - If you’re married, your spouse’s income or loan debt will be considered only if you file a joint tax return or you choose to repay your Direct Loans jointly with your spouse.
+
+    **Time Frame**:
+    - Any outstanding balance will be forgiven if you haven’t repaid your loan in full after 25 years.
+    - You may have to pay income tax on any amount that is forgiven.
+
+    **Eligible Loans**:
+    - Direct Subsidized and Unsubsidized Loans
+    - Direct PLUS Loans made to students
+    - Direct Consolidation Loans
+
+    ref: https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/icr
+    """
     poverty_level = _get_poverty_guideline(state, household_size)
     discretionary_income = max(agi - poverty_level, 0)
     monthly_discretionary = discretionary_income / 12
     discretionary_payment = monthly_discretionary * 0.20
 
-    base_payment = _calculate_fixed_payment(balance, interest)
+    base_payment = _calculate_fixed_payment(balance, interest, years=12)
     chart = _get_chart_ICR(household_size)
 
     if (household_size == 1 and agi >= 352418) or (household_size > 1 and agi >= 409597):
@@ -203,11 +227,30 @@ def calculate_ICR(balance: USD, interest: InterestRate, agi: USD, household_size
 
 
 def calculate_IBR(balance: USD, interest: InterestRate, agi: USD, household_size: int, state: str, borrower_type: BorrowerType) -> PaymentPlanDetails:
+    """
+    **Monthly Payment**:
+    - Your monthly payments will be either 10 or 15 percent of discretionary income (depending on when you received your first loans), but never more than you would have paid under the 10-year Standard Repayment Plan.
+    - Payments are recalculated each year and are based on your updated income and family size.
+    - You must update your income and family size each year, even if they haven’t changed.
+    - If you’re married, your spouse’s income or loan debt will be considered only if you file a joint tax return.
+
+    **Time Frame**:
+    - Any outstanding balance on your loan will be forgiven if you haven’t repaid your loan in full after 20 or 25 years, depending on when you received your first loans.
+    - You may have to pay income tax on any amount that is forgiven. 
+
+    **Eligible Loans**:
+    - Direct Subsidized and Unsubsidized Loans
+    - Subsidized and Unsubsidized Federal Stafford Loans
+    - all PLUS Loans made to students
+    - Consolidation Loans (Direct or FFEL) that do not include PLUS loans (Direct or FFEL) made to parents
+
+    ref: https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/ibr1
+    """
     poverty = _get_poverty_guideline(state, household_size)
     poverty150 = poverty * 1.5
     discretionary_income = max((agi - poverty150), 0)
     percent = 0.10 if borrower_type == "new" else 0.15
-    forgiveness_years = 20 if "new" else 25
+    forgiveness_years = 20 if borrower_type == "new" else 25
 
     annual_payment = discretionary_income * percent
     monthly_payment = annual_payment / 12
@@ -226,15 +269,32 @@ def calculate_IBR(balance: USD, interest: InterestRate, agi: USD, household_size
 
 
 def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_size: int, state: str) -> PaymentPlanDetails:
-    poverty = _get_poverty_guideline(state, household_size);
-    poverty150 = poverty * 1.5;
-    discretionary_income = max(agi - poverty150, 0);
-    percent = 0.10;
-    forgiveness_years = 20;
+    """
+    **Monthly Payment**:
+    - Discretionary Income = Your Income – (150% × HHS federal poverty guidelines)
+    - Reduced by $50 for each dependent on your federal tax return
+    - Total monthly payment may not be less than $10
 
-    annual_payment = discretionary_income * percent;
-    monthly_payment = annual_payment / 12;
-    standard_monthly = calculate_standard_payment(balance, interest);
+    **Time Frame**:
+    - First available to borrowers in 2012, PAYE is a federal income-driven repayment plan available to certain U.S. student loan borrowers.
+    - Payments are based on your income and are made for a maximum of 240 monthly payments (20 years). Any amounts remaining after 240 monthly payments are forgiven.
+
+    **Eligible Loans**:
+    - You must be a new borrower as of October 1, 2007, and must have received at least one Federal Direct Loan disbursed after October 1, 2011. You are a new borrower if you have never received a loan prior to October 1, 2007, or you have paid in full any federal loan balances received prior to receiving a new loan after October 1, 2007.
+    - Only Federal Direct loans qualify for PAYE. Other federal loan types (Federal Family Education Loans, Federal Perkins, and Health Professions Student Loans) disbursed after October 1, 2007, are eligible if consolidated into a Direct Consolidation loan.
+    - If the payments due under PAYE are less than the payments that would be due under a standard 10-year repayment plan, you have a partial financial hardship (PFH). A rule of thumb: If your debt exceeds your income, you likely demonstrate a PFH under PAYE.
+
+    ref: https://www.vin.com/studentdebtcenter/default.aspx?pid=14352&catId=74141&id=7250325
+    """
+    poverty = _get_poverty_guideline(state, household_size)
+    poverty150 = poverty * 1.5
+    discretionary_income = max(agi - poverty150, 0)
+    percent = 0.10
+    forgiveness_years = 20
+
+    annual_payment = discretionary_income * percent
+    monthly_payment = annual_payment / 12
+    standard_monthly = calculate_standard_payment(balance, interest)
     
     if (monthly_payment > standard_monthly):
         monthly_payment = standard_monthly
@@ -249,8 +309,39 @@ def calculate_PAYE(balance: USD, interest: InterestRate, agi: USD, household_siz
 
 
 def calculate_REPAYE(balance: USD, interest: InterestRate, agi: USD, household_size: int, state: str, borrower_type: BorrowerType) -> USD:
-    ibr_payments = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
-    return ibr_payments * 0.666
+    """
+    **Monthly Payment**:
+    - The REPAYE Plan helps keep a borrower’s monthly student loan payments affordable by capping the payment amount at 10% of the borrower’s discretionary income.
+    - ... all Direct loan student borrowers [are granted] the ability to cap their monthly payments at 10% of their “discretionary income,” defined as **adjusted gross income** above **150%** of the applicable **poverty guideline** divided by twelve.
+
+    **Time Frame**:
+    - Borrowers in REPAYE whose only eligible Direct loan debt is for undergraduate education will have any outstanding balance forgiven after 20 years of repayment.
+    - Borrowers with eligible Direct loan debt received for any graduate or professional education will have their balance forgiven after 25 years.
+
+    **Eligible Loans**:
+    - All Direct Loan borrowers
+
+    ref: https://studentloanborrowerassistance.org/the-revised-pay-as-you-earn-repaye-plan-is-now-available/
+    ref: https://fsapartners.ed.gov/fsa-print/publication/8658
+    """
+    poverty = _get_poverty_guideline(state, household_size)
+    poverty150 = poverty * 1.5
+    discretionary_income = max((agi - poverty150), 0)
+    forgiveness_years = 20 if borrower_type == "new" else 25
+    percent = 0.10
+
+    annual_payment = discretionary_income * percent
+    monthly_payment = annual_payment / 12
+    standard_monthly = calculate_standard_payment(balance, interest)
+    
+    if (monthly_payment > standard_monthly):
+        monthly_payment = standard_monthly
+
+    # NOTE: Previous calculation
+    # ibr_payments = calculate_IBR(balance, interest, agi, household_size, state, borrower_type)["monthly_payment"]
+    # return ibr_payments * 0.666
+
+    return monthly_payment
 
 
 def _get_RAP_percentage(agi: USD) -> float:
@@ -268,6 +359,23 @@ def _get_RAP_percentage(agi: USD) -> float:
 
 
 def calculate_RAP(agi: USD, num_of_dependents: int) -> PaymentPlanDetails:
+    """
+    **Monthly Payment**:
+    - A percentage of your adjusted gross income (AGI) up to 10%, divided by 12
+    - Reduced by $50 for each dependent on your federal tax return
+    - Total monthly payment may not be less than $10
+
+    **Time Frame**:
+    - Any outstanding balance will be forgiven if you haven’t repaid your loan in full after 30 years of qualifying payments.
+    - Any amount that is forgiven may be considered income for tax purposes.
+
+    **Eligible Loans**:
+    - Direct Loans
+    - Direct PLUS loans for graduate or professional students
+    - Direct Consolidation loans that do not include a Parent PLUS loan
+
+    ref: https://edfinancial.studentaid.gov/income-driven-repaymentinformation-center/rap
+    """
     percentage = _get_RAP_percentage(agi)
     monthly_payment = (agi * percentage) / 12 - (50 * num_of_dependents)
     monthly_payment = max(10, monthly_payment)
@@ -279,6 +387,38 @@ def calculate_RAP(agi: USD, num_of_dependents: int) -> PaymentPlanDetails:
         "forgiveness_years": 30,
         "notes": "% of AGI minus $50 per dependent claimed on tax return. Minimum $10/month."
     }
+
+
+def calculate_SAVE(agi: USD, household_size: int, state: str, balance: USD, grad_school_loan_balance: USD = 0):
+    """
+    **Monthly Payment**:
+    - Multiply 2.25 times your poverty level number
+    - Subtract the answer from step 1 from your AGI
+    - Payments on undergraduate loans will be cut in half (from 10% to 5% of incomes above 225% of FPL).
+    - Borrowers who have undergraduate and graduate loans will pay a weighted average of between 5% and 10% of their income based upon the original principal balances of their loans.
+    - Multiply the answer from step 2 by 0.1
+    - Divide the answer from step 3 by 12
+
+    **Eligible Loans**:
+    - Direct Subsidized Loans
+    - Direct Unsubsidized Loans,
+    - Direct PLUS Loans made to graduate or professional students, and
+    - Direct Consolidation Loans that did not repay any PLUS loans made to parents
+
+    ref: https://www.law.uchicago.edu/save-repayment-plan-faq
+    ref: https://www.reddit.com/r/StudentLoans/comments/16cgnup/calculate_save_plan_payment_how_to/
+    """
+    poverty = _get_poverty_guideline(state, household_size)
+    poverty225 = poverty * 2.25
+    discretionary_income = max((agi - poverty225), 0)
+    total_loan_balance = balance + grad_school_loan_balance
+    grad_loan_burden_percent = max((calculate_difference(grad_school_loan_balance, total_loan_balance)[1] * 0.05), 0)
+    percent = 0.05 + grad_loan_burden_percent
+
+    annual_payment = discretionary_income * percent
+    monthly_payment = annual_payment / 12
+
+    return monthly_payment
 
 
 def calculate_all_plans(*, balance: USD, interest: InterestRate, agi: USD, household_size: int, num_of_dependents: int, state: str, borrower_type: BorrowerType):
