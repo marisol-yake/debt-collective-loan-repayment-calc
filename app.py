@@ -384,21 +384,21 @@ def spawn_payment_plan_explainer_popup() -> None:
         \n""",
         "grad_loan_balance": f"""your grad loan balance is \${grad_loan_balance:,.2f}
         \n""",
-        "interest": f"""your interest rate is {interest:,.2f}%
+        "interest": f"""Your interest rate is {interest:,.2f}%
         \n""",
-        "state": f"""you live in {"the **" + state if state != "alaska" or state != "hawaii" else state}**
+        "state": f"""You live in {"the **" + state if state != "alaska" or state != "hawaii" else state}**.
         \n""",
-        "agi": f"""your AGI is \${agi:,.2f}
+        "agi": f"""Your AGI is \${agi:,.2f}
         \n""",
-        "household_size": f"""your household size is {household_size:d}
+        "household_size": f"""Your household size is {household_size:d}
         \n""",
-        "num_of_dependents": f"""your number of dependents is {num_of_dependents:d}
+        "num_of_dependents": f"""Your number of dependents is {num_of_dependents:d}
         \n""",
-        "borrower_type": f"""your loan originates **{"before July 1st, 2014"
+        "borrower_type": f"""Your loan originates **{"before July 1st, 2014"
                                 if borrower_type == "old"
-                                else "after July 1st, 2014"}**
+                                else "after July 1st, 2014"}**.
         \n""",
-        "years": "Assuming a repayment period of **15 years**"}
+        "years": "Assuming a repayment period of **15 years**."}
 
         if not param_names:
             msg = "".join([loan_inputs[fragment] for fragment in loan_inputs])
