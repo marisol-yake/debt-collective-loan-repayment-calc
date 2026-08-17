@@ -16,7 +16,8 @@ def init_session_state() -> None:
         "std": 0.0,
 
     "input_checklist_timer_done": False,
-    "grad_loan_balance": 0.0
+    "grad_loan_balance": 0.0,
+    "comparison_plan": "Traditional Repayment Plan"
     }
 
     for key, value in defaults.items():
@@ -239,6 +240,25 @@ def display_plan_comparison() -> None:
 
 @st.dialog("Before you begin!")
 def spawn_loan_input_checklist() -> None:
+    st.html(
+    """
+    <style>
+        button[aria-label="Close"] {
+            background-color: rgb(255, 75, 75) !important;
+            color: white !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            width: 30px !important;
+            height: 30px !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+    </style>
+    """
+    )
     st.markdown("Gathering all of your loan details can be a headache, so we've provided a small checklist to make sure you have everything in one place before you begin.")
 
     st.checkbox("**Student-Loan Servicer** or **FSA** Payment Plan Estimate in USD ($)")
@@ -246,20 +266,6 @@ def spawn_loan_input_checklist() -> None:
     st.checkbox("Your Loan's **Annual Interest Rate** as a Percentage (%)")
     st.checkbox("Your **Adjusted Gross Income** in USD ($)")
     st.checkbox("Does Your Loan Originate **Before** or **After** July 1st, 2014?")
-
-    # TODO: Decide which is less tedious / more intuitive
-    # Option 1
-    # Streamlit won't let you ignore the dialog modal without just pressing the "X" button
-    # Or re-running the app entirely.
-    if st.button("I'm ready!", type="primary"):
-        st.rerun()
-
-    # Option 2
-    st.markdown("Press the '**x**' in the top-right corner of this box to continue.")
-
-    # Option 3
-    # Make 'x' in the top-right corner into bordered box, colored-in red with a white 'x'
-    # TODO: Implement this option
 
 
 @st.dialog("Want to get connected?")
@@ -303,12 +309,36 @@ def configure_share_button() -> None:
     st.button("Share Results", on_click=spawn_get_connected_popup, type="primary")
 
 
+@st.dialog(f"How We Calculated Your Estimate {st.session_state.get("comparison_plan", "Traditional Repayment Plan")}")
 def spawn_payment_plan_explainer_popup() -> None:
-    ...
+    balance = st.session_state.get("total_balance", 0.0)
+    grad_loan_balance = st.session_state.get("grad_loan_balance", 0.0)
+    interest = st.session_state.get("annual_interest_rate", 0.0)
+    agi = st.session_state.get("agi", 0.0)
+    household_size = st.session_state.get("household_size", 0)
+    num_of_dependents = st.session_state.get("num_of_dependents", 0)
+    state = st.session_state.get("state_of_residency", "contiguous")
+    borrower_type = "new" if "new" in str(st.session_state.borrower_type).lower() else "old"
+
+    plan_explanations = {
+        "Income-Based Repayment (IBR)": """Blah blah blah""",
+        "Income-Contingent Repayment (ICR)": """Blah blah blah""",
+        "Pay As You Earn (PAYE)": """Blah blah blah""",
+        "Revised Pay As You Earn (REPAYE)": """Blah blah blah""",
+        "Repayment Assistance Plan (RAP)": """Blah blah blah""",
+        "Saving on a Valuable Education (SAVE)": """Blah blah blah""",
+        "Traditional Repayment Plan": """Blah blah blah"""
+    }
+
+    if st.session_state["comparison_plan"] in plan_explanations:
+        key = st.session_state.get("comparison_plan", "Traditional Repayment Plan")
+        explainer = plan_explanations.get(key, "Traditional Repayment Plan")
+        st.markdown(explainer)
+
 
 
 def configure_calculation_explainer_button() -> None:
-    ...
+    st.button("How Did We Get This?", on_click=spawn_payment_plan_explainer_popup, type="primary")
 
 
 def configure_footer() -> None:
@@ -330,7 +360,12 @@ def main() -> None:
     configure_input_sidebar()
     configure_plan_selection_menu()
     display_plan_comparison()
-    configure_share_button()
+
+    col1, col2 = st.columns([0.75, 0.15])
+    with col1:
+        configure_share_button()
+    with col2:
+        configure_calculation_explainer_button()
     configure_footer()
 
     # Pop up comes up after all page contents have loaded
