@@ -23,9 +23,9 @@ def calculate_difference(a: Number, b: Number) -> tuple[Number, Number]:
     difference = a - b
 
     # Handles edge cases where comparison is 0 / 0
-    if b == 0:
+    if a == 0:
         # Case 1: Where selected plan payment amount = 0 and servicer estimate = 0
-        if a == 0:
+        if b == 0:
             percent_difference = 0.0
         # Case 2: Where selected plan payment amount = 0 and servicer estimate != 0
         else:
