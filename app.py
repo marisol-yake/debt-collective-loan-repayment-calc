@@ -286,6 +286,25 @@ def spawn_loan_input_checklist() -> None:
 
 @st.dialog("Want to get connected?")
 def spawn_get_connected_popup() -> None:
+    st.html(
+    """
+    <style>
+        button[aria-label="Close"] {
+            background-color: rgb(255, 75, 75) !important;
+            color: white !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            width: 30px !important;
+            height: 30px !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+    </style>
+    """
+    )
     st.markdown("We at the debt collective understand that this is a sensitive topic, so we protect your information at every step.")
     st.markdown("Click here to see our [data privacy policy](google.com).")
 
@@ -327,6 +346,25 @@ def configure_share_button() -> None:
 
 @st.dialog(f"How We Calculated Your Estimate: {st.session_state.get("comparison_plan", "Traditional Repayment Plan")}")
 def spawn_payment_plan_explainer_popup() -> None:
+    st.html(
+    """
+    <style>
+        button[aria-label="Close"] {
+            background-color: rgb(255, 75, 75) !important;
+            color: white !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            width: 30px !important;
+            height: 30px !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+    </style>
+    """
+    )
     balance = init_sensible_default_for(st.session_state.total_balance, value=0.0)
     grad_loan_balance = init_sensible_default_for(st.session_state.grad_loan_balance, value=0.0)
     total_balance = balance + grad_loan_balance
