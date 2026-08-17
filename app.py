@@ -7,6 +7,7 @@ import time
 
 def init_session_state() -> None:
     defaults = {
+        # Default calculator inputs
         "ibr": 0.0,
         "icr": 0.0,
         "paye": 0.0,
@@ -14,10 +15,25 @@ def init_session_state() -> None:
         "rap": 0.0,
         "save": 0.0,
         "std": 0.0,
+        "total_balance": 0.0,
+        "grad_loan_balance": 0.0,
+        "comparison_plan": "Traditional Repayment Plan",
 
-    "input_checklist_timer_done": False,
-    "grad_loan_balance": 0.0,
-    "comparison_plan": "Traditional Repayment Plan"
+        # UI Behavior
+        "input_checklist_timer_done": False,
+
+        # Help Messages
+        "agi_helper": """Adjusted Gross Income (**AGI**) = (**Hourly Rate** x **Hours Worked Per Week**) x **Weeks Worked In a Year**
+        Example: \t**AGI** = (\$25 x 40) x 52 -> **AGI** = \$52,000
+        """,
+        "servicer_estimate_helper": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "household_size_helper": "Used in calculations for IBR, PAYE, and ICR",
+        "state_of_residency_helper": "If you don't live in **Alaska** or **Hawaii**, you can use **Contiguous U.S.**",
+        "annual_interest_rate_helper": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "num_of_dependents_helper": "Claimed on taxes. Only for RAP calculation.",
+        "borrower_type_helper": "Used for IBR calculations.",
+        "total_balance_helper": "Your outstanding loan balance.",
+        "grad_loan_balance_helper": "Loan balance from graduate school studies."
     }
 
     for key, value in defaults.items():
@@ -101,55 +117,55 @@ def configure_input_sidebar() -> None:
             # Setting value=None means that st.number_input is already cleared for users automatically.
 
             st.number_input("Adjusted Gross Income (AGI) ($):",
-                                min_value=0.0, value=None, step=1.0, placeholder="$0.00",
-                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                                key="agi")
+                            min_value=0.0, value=None, step=1.0, placeholder="$0.00",
+                            help=st.session_state.get("agi_helper"),
+                            key="agi")
+
             col1, col2 = st.columns(2)
             with col1:
                 st.number_input("Servicer Monthly Estimate ($):",
                                 min_value=0.0, value=None, step=1.0, placeholder="$0.00",
-                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                help=st.session_state.get("servicer_estimate_helper"),
                                 key="servicer_estimate")
-                
                 st.number_input("Household Size:",
                                 min_value=0, value=None, step=1, placeholder="0",
-                                help="Used in calculations for IBR, PAYE, and ICR",
+                                help=st.session_state.get("household_size_helper"),
                                 key="household_size")
                 st.selectbox("State of Residency:",
                              options=["Contiguous U.S.", "Alaska", "Hawaii"],
-                             help="If you don't live in **Alaska** or **Hawaii**, you can use **Contiguous U.S.**",
+                             help=st.session_state.get("state_of_residency_helper"),
                              key="state_of_residency")
 
             with col2:
                 st.number_input("Annual Interest Rate (%):",
                                 min_value=0.0, value=None, step=1.0, placeholder="0.00%",
-                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                help=st.session_state.get("annual_interest_rate_helper"),
                                 key="annual_interest_rate")
-
                 st.number_input("Number of Dependents:",
-                            min_value=0, value=None, step=1, placeholder="0",
-                            help="Claimed on taxes. Only for RAP calculation.",
-                            key="num_of_dependents")
+                                min_value=0, value=None, step=1, placeholder="0",
+                                help=st.session_state.get("num_of_dependents_helper"),
+                                key="num_of_dependents")
                 st.selectbox("Borrower Type:",
-                            options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
-                            help="Used for IBR calculations.",
-                            index=None, placeholder="Choose a Borrower Type", key="borrower_type")
+                             options=["New Borrower (After July 1, 2014)", "Old Borrower (Before July 1, 2014)"],
+                             help=st.session_state.get("borrower_type_helper"),
+                             index=None, placeholder="Choose a Borrower Type",
+                             key="borrower_type")
 
             # Grad School Loan toggle checkbox
             # Can only loan dynamically if checkbox is not within form
             if not has_grad_loans:
                 st.number_input("Total Loan Balance ($):",
                                 min_value=0.0, value=None, step=1.0, placeholder="$0.00",
-                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                help=st.session_state.get("total_balance_helper"),
                                 key="total_balance")
             else:
                 st.number_input("Undergraduate Loan Balance ($):",
                                 min_value=0.0, value=None, step=1.0, placeholder="$0.00",
-                                help="Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                help=st.session_state.get("total_balance_helper"),
                                 key="total_balance")
                 st.number_input("Graduate School Loan Balance ($):",
                                 min_value=0.0, value=None, step=1.0, placeholder="$0.00",
-                                help="Loan balance from graduate school studies.",
+                                help=st.session_state.get("grad_loan_balance_helper"),
                                 key="grad_loan_balance")
 
             submitted = st.form_submit_button("Calculate", width="stretch", type="primary")
@@ -264,7 +280,7 @@ def spawn_loan_input_checklist() -> None:
     st.checkbox("**Student-Loan Servicer** or **FSA** Payment Plan Estimate in USD ($)")
     st.checkbox("**Total Outstanding Loan Amount** in USD ($)")
     st.checkbox("Your Loan's **Annual Interest Rate** as a Percentage (%)")
-    st.checkbox("Your **Adjusted Gross Income** in USD ($)")
+    st.checkbox("Your **Adjusted Gross Income** in USD ($)", help=st.session_state.get("agi_helper"))
     st.checkbox("Does Your Loan Originate **Before** or **After** July 1st, 2014?")
 
 
@@ -309,25 +325,60 @@ def configure_share_button() -> None:
     st.button("Share Results", on_click=spawn_get_connected_popup, type="primary")
 
 
-@st.dialog(f"How We Calculated Your Estimate {st.session_state.get("comparison_plan", "Traditional Repayment Plan")}")
+@st.dialog(f"How We Calculated Your Estimate: {st.session_state.get("comparison_plan", "Traditional Repayment Plan")}")
 def spawn_payment_plan_explainer_popup() -> None:
-    balance = st.session_state.get("total_balance", 0.0)
-    grad_loan_balance = st.session_state.get("grad_loan_balance", 0.0)
-    interest = st.session_state.get("annual_interest_rate", 0.0)
-    agi = st.session_state.get("agi", 0.0)
-    household_size = st.session_state.get("household_size", 0)
-    num_of_dependents = st.session_state.get("num_of_dependents", 0)
+    balance = init_sensible_default_for(st.session_state.total_balance, value=0.0)
+    grad_loan_balance = init_sensible_default_for(st.session_state.grad_loan_balance, value=0.0)
+    total_balance = balance + grad_loan_balance
+    interest = init_sensible_default_for(st.session_state.annual_interest_rate, value=0.0)
+    agi = init_sensible_default_for(st.session_state.agi, value=0.0)
+    household_size = init_sensible_default_for(st.session_state.household_size, value=0)
+    num_of_dependents = init_sensible_default_for(st.session_state.num_of_dependents, value=0)
     state = st.session_state.get("state_of_residency", "contiguous")
     borrower_type = "new" if "new" in str(st.session_state.borrower_type).lower() else "old"
 
+    # TODO: Extract this from spawn_payment_plan_explainer_popup()
+    def msg_contains(param_names: list[str] | None = None):
+        msg = f""
+        loan_inputs = {"balance": f"""Your undergraduate loan balance is \${balance:,.2f}
+        \n""",
+        "total_balance": f"""Your outstanding balance is \${total_balance:,.2f}
+        \n""",
+        "grad_loan_balance": f"""your grad loan balance is \${grad_loan_balance:,.2f}
+        \n""",
+        "interest": f"""your interest rate is {interest:,.2f}%
+        \n""",
+        "state": f"""you live in {"the **" + state if state != "alaska" or state != "hawaii" else state}**
+        \n""",
+        "agi": f"""your AGI is \${agi:,.2f}
+        \n""",
+        "household_size": f"""your household size is {household_size:d}
+        \n""",
+        "num_of_dependents": f"""your number of dependents is {num_of_dependents:d}
+        \n""",
+        "borrower_type": f"""your loan originates **{"before July 1st, 2014"
+                                if borrower_type == "old"
+                                else "after July 1st, 2014"}**
+        \n""",
+        "years": "Assuming a repayment period of **15 years**"}
+
+        if not param_names:
+            msg = "".join([loan_inputs[fragment] for fragment in loan_inputs])
+            return msg
+
+        for param in param_names:
+            if param in loan_inputs:
+                msg += loan_inputs[param]
+        return msg
+
     plan_explanations = {
-        "Income-Based Repayment (IBR)": """Blah blah blah""",
-        "Income-Contingent Repayment (ICR)": """Blah blah blah""",
-        "Pay As You Earn (PAYE)": """Blah blah blah""",
-        "Revised Pay As You Earn (REPAYE)": """Blah blah blah""",
-        "Repayment Assistance Plan (RAP)": """Blah blah blah""",
-        "Saving on a Valuable Education (SAVE)": """Blah blah blah""",
-        "Traditional Repayment Plan": """Blah blah blah"""
+        "Income-Based Repayment (IBR)": msg_contains(["balance", "interest", "agi", "household_size", "state", "borrower_type"]),
+        "Income-Contingent Repayment (ICR)": msg_contains(["balance", "interest", "agi", "household_size", "state"]),
+        "Pay As You Earn (PAYE)": msg_contains(["balance", "interest", "agi", "household_size", "state"]),
+        "Revised Pay As You Earn (REPAYE)": msg_contains(["balance", "interest", "agi", "household_size", "state", "borrower_type"]),
+        "Repayment Assistance Plan (RAP)": msg_contains(["agi", "num_of_dependents"]),
+        "Saving on a Valuable Education (SAVE)": msg_contains(["balance", "grad_loan_balance", "agi", "household_size", "state"]),
+        "Traditional Repayment Plan": msg_contains(["balance", "interest", "years"])
     }
 
     if st.session_state["comparison_plan"] in plan_explanations:
