@@ -32,8 +32,9 @@ def init_session_state() -> None:
         "annual_interest_rate_helper": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         "num_of_dependents_helper": "Claimed on taxes. Only for RAP calculation.",
         "borrower_type_helper": "Used for IBR calculations.",
-        "total_balance_helper": "Your outstanding loan balance.",
-        "grad_loan_balance_helper": "Loan balance from graduate school studies."
+        "balance_helper": "Loan balance from undergraduate school studies.",
+        "grad_loan_balance_helper": "Loan balance from graduate school studies.",
+        "total_balance_helper": "Your total outstanding loan balance.",
     }
 
     for key, value in defaults.items():
@@ -161,7 +162,7 @@ def configure_input_sidebar() -> None:
             else:
                 st.number_input("Undergraduate Loan Balance ($):",
                                 min_value=0.0, value=None, step=1.0, placeholder="$0.00",
-                                help=st.session_state.get("total_balance_helper"),
+                                help=st.session_state.get("balance_helper"),
                                 key="total_balance")
                 st.number_input("Graduate School Loan Balance ($):",
                                 min_value=0.0, value=None, step=1.0, placeholder="$0.00",
